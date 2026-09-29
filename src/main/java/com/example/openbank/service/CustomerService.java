@@ -1,6 +1,7 @@
 package com.example.openbank.service;
 
 import com.example.openbank.entity.Customer;
+import com.example.openbank.exception.CustomerNotFoundException;
 import com.example.openbank.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +24,14 @@ public class CustomerService {
         return customerRepository.findAll();
     }
 
-    public Customer getCustomerById(Long id) {
+     public Customer getCustomerById(Long id) {
+
         return customerRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Customer not found"));
+                        new CustomerNotFoundException(
+                                "Customer not found with ID: " + id
+                        )
+                );
     }
 
     public Customer updateCustomer(Long id, Customer updatedCustomer) {

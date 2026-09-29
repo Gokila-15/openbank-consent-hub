@@ -7,6 +7,9 @@ import com.example.openbank.entity.Customer;
 import com.example.openbank.repository.AccountRepository;
 import com.example.openbank.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
+import com.example.openbank.exception.AccountNotFoundException;
+import com.example.openbank.exception.BusinessException;
+import com.example.openbank.exception.CustomerNotFoundException;
 
 import java.util.List;
 
@@ -63,43 +66,52 @@ public class AccountService {
     }
 
     // GET BY ID
-    public Account getAccountById(Long id) {
+   public Account getAccountById(Long id) {
 
         return accountRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Account not found"));
+                        new AccountNotFoundException(
+                                "Account not found with ID: " + id
+                        )
+                );
     }
 
     // GET BY CUSTOMER
     public List<Account> getAccountsByCustomer(Long customerId) {
 
         // Make sure customer exists
-        if (!customerRepository.existsById(customerId)) {
-            throw new RuntimeException("Customer not found");
-        }
+       if (!customerRepository.existsById(customerId)) {
+
+    throw new CustomerNotFoundException(
+            "Customer not found with id: " + customerId
+    );
+}
 
         return accountRepository.findByCustomerId(customerId);
     }
 
     // PUT
-    public Account updateAccount(
-            Long id,
-            UpdateAccountRequest request) {
+public Account updateAccount(
+        Long id,
+        UpdateAccountRequest request) {
 
-        Account account = getAccountById(id);
+    Account account = getAccountById(id);
 
-        if (request.getAccountType() == null ||
-                request.getStatus() == null) {
+    if (request.getAccountType() == null ||
+            request.getStatus() == null) {
 
-            throw new RuntimeException(
-                    "PUT requires accountType and status");
-        }
-
-        account.setAccountType(request.getAccountType());
-        account.setStatus(request.getStatus());
-
-        return accountRepository.save(account);
+        throw new BusinessException(
+                "PUT requires accountType and status");
     }
+
+    account.setAccountType(
+            request.getAccountType());
+
+    account.setStatus(
+            request.getStatus());
+
+    return accountRepository.save(account);
+}
 
    
 
