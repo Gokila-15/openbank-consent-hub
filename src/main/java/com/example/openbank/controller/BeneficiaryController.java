@@ -55,7 +55,7 @@ public class BeneficiaryController {
                         .getBeneficiaryById(id));
     }
 
-    @GetMapping("/customer/{customerId}")
+    @GetMapping("/customers/{customerId}")
     public ResponseEntity<List<Beneficiary>>
     getBeneficiariesByCustomer(
             @PathVariable Long customerId) {
