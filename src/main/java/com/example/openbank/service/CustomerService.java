@@ -1,5 +1,7 @@
 package com.example.openbank.service;
 
+import com.example.openbank.dto.CreateCustomerRequest;
+import com.example.openbank.dto.UpdateCustomerRequest;
 import com.example.openbank.entity.Customer;
 import com.example.openbank.exception.CustomerNotFoundException;
 import com.example.openbank.repository.CustomerRepository;
@@ -16,9 +18,16 @@ public class CustomerService {
         this.customerRepository = customerRepository;
     }
 
-    public Customer createCustomer(Customer customer) {
-        return customerRepository.save(customer);
-    }
+  public Customer createCustomer(CreateCustomerRequest request) {
+
+    Customer customer = new Customer();
+
+    customer.setName(request.getName());
+    customer.setEmail(request.getEmail());
+    customer.setPhone(request.getPhone());
+
+    return customerRepository.save(customer);
+}
 
     public List<Customer> getAllCustomers() {
         return customerRepository.findAll();
@@ -34,16 +43,21 @@ public class CustomerService {
                 );
     }
 
-    public Customer updateCustomer(Long id, Customer updatedCustomer) {
+   public Customer updateCustomer(
+        Long id,
+        UpdateCustomerRequest request) {
 
-        Customer customer = getCustomerById(id);
+    Customer customer = customerRepository.findById(id)
+            .orElseThrow(() ->
+                    new CustomerNotFoundException(
+                            "Customer not found with id: " + id));
 
-        customer.setName(updatedCustomer.getName());
-        customer.setEmail(updatedCustomer.getEmail());
-        customer.setPhone(updatedCustomer.getPhone());
+    customer.setName(request.getName());
+    customer.setEmail(request.getEmail());
+    customer.setPhone(request.getPhone());
 
-        return customerRepository.save(customer);
-    }
+    return customerRepository.save(customer);
+}
 
     public void deleteCustomer(Long id) {
 

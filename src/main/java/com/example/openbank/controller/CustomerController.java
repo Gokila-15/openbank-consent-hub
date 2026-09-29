@@ -1,11 +1,13 @@
 package com.example.openbank.controller; 
  
+import com.example.openbank.dto.CreateCustomerRequest;
+import com.example.openbank.dto.UpdateCustomerRequest;
 import com.example.openbank.entity.Customer; 
 import com.example.openbank.service.CustomerService; 
 import org.springframework.http.HttpStatus; 
 import org.springframework.http.ResponseEntity; 
 import org.springframework.web.bind.annotation.*; 
- 
+import jakarta.validation.Valid;
 import java.util.List; 
  
 @RestController 
@@ -18,15 +20,16 @@ public class CustomerController {
         this.customerService = customerService; 
     } 
  
-    @PostMapping 
-    public ResponseEntity<Customer> createCustomer( 
-            @RequestBody Customer customer) { 
- 
-        return ResponseEntity 
-                .status(HttpStatus.CREATED) 
-                .body(customerService.createCustomer(customer)); 
-    } 
- 
+    @PostMapping
+    public ResponseEntity<Customer> createCustomer(
+            @Valid @RequestBody CreateCustomerRequest request) {
+
+        Customer customer = customerService.createCustomer(request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(customer);
+    }
     @GetMapping 
     public ResponseEntity<List<Customer>> getAllCustomers() { 
  
@@ -44,15 +47,15 @@ public class CustomerController {
         ); 
     } 
  
-    @PutMapping("/{id}") 
-    public ResponseEntity<Customer> updateCustomer( 
-            @PathVariable Long id, 
-            @RequestBody Customer customer) { 
- 
-        return ResponseEntity.ok( 
-                customerService.updateCustomer(id, customer) 
-        ); 
-    } 
+   @PutMapping("/{id}")
+public ResponseEntity<Customer> updateCustomer(
+        @PathVariable Long id,
+        @Valid @RequestBody UpdateCustomerRequest request) {
+
+    Customer customer = customerService.updateCustomer(id, request);
+
+    return ResponseEntity.ok(customer);
+}
  
     @DeleteMapping("/{id}") 
     public ResponseEntity<Void> deleteCustomer( 
