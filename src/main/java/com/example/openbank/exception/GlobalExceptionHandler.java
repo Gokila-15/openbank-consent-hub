@@ -97,4 +97,16 @@ public ResponseEntity<Map<String, Object>> handleValidationException(
                     "timestamp", LocalDateTime.now()
             ));
 }
+@ExceptionHandler(ConsentNotFoundException.class)
+public ResponseEntity<Map<String, Object>> handleConsentNotFound(
+        ConsentNotFoundException ex) {
+
+    return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body(Map.of(
+                    "status", 404,
+                    "message", ex.getMessage(),
+                    "timestamp", LocalDateTime.now()
+            ));
+}
 }

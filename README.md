@@ -1,375 +1,300 @@
 # OpenBank Consent Hub
 
-## Overview
+A secure Open Banking Consent Management System built using Spring Boot, PostgreSQL, JPA/Hibernate, Bean Validation, and REST APIs.
 
-OpenBank Consent Hub is an Open Banking Consent Management System being developed using Spring Boot and PostgreSQL.
-
-The project aims to provide a secure banking backend with customer management, account management, transaction processing, beneficiary management, and Open Banking consent workflows.
-
-The current implementation focuses on the initial backend foundation and core Customer and Account APIs.
+The project is being developed as part of a Full-Stack Developer Training and Selection Program.
 
 ---
 
-## Technology Stack
+## Project Overview
 
-### Currently Used
+OpenBank Consent Hub is a backend-focused Open Banking application that manages customers, bank accounts, transactions, beneficiaries, and customer consent requests.
 
-* Java 21
-* Spring Boot
-* Spring Web
-* Spring Data JPA
-* Hibernate
-* PostgreSQL
-* Maven
-* Postman
-* Git
+The system is designed around a banking domain and will later be extended with:
 
-### Planned
-
-* React
-* Spring Security
-* Keycloak
-* JWT
-* Nginx
-* Docker
+* Keycloak authentication
+* JWT-based API security
+* Role-Based Access Control (RBAC)
+* Maker/Checker workflow
+* React frontend
+* Nginx API gateway
 * Docker Compose
 
+### Current Status
+
+The following backend modules have been completed:
+
+* Customer Management
+* Account Management
+* Transaction Management
+* Beneficiary Management
+* Consent Management
+* Bean Validation
+* Custom Exception Handling
+* Global Exception Handling
+
 ---
 
-## Backend Architecture
+# Technology Stack
 
-The backend follows a layered architecture:
+| Technology              | Purpose                        |
+| ----------------------- | ------------------------------ |
+| Java 21                 | Backend programming language   |
+| Spring Boot             | Backend framework              |
+| Spring Web              | REST API development           |
+| Spring Data JPA         | Database access                |
+| Hibernate               | ORM                            |
+| PostgreSQL              | Relational database            |
+| Jakarta Bean Validation | Request validation             |
+| Spring Security         | Initial security configuration |
+| Maven                   | Dependency management          |
+| Postman                 | API testing                    |
+| Git/GitHub              | Version control                |
+
+---
+
+# Project Architecture
 
 ```text
-Client / Postman
-       |
-       v
+                    Client
+                      |
+                      | HTTP Request
+                      ↓
+                REST Controller
+                      |
+                      ↓
+                     DTO
+                      |
+                 @Valid
+                      |
+                      ↓
+                  Service
+                      |
+                      ↓
+                 Repository
+                      |
+                      ↓
+                 JPA/Hibernate
+                      |
+                      ↓
+                  PostgreSQL
+```
+
+Exception handling:
+
+```text
 Controller
-       |
-       v
-Service
-       |
-       v
-Repository
-       |
-       v
-Hibernate / JPA
-       |
-       v
-PostgreSQL
-```
-
-### Package Structure
-
-```text
-src/main/java/com/banfico/openbank/
-
-├── controller/
-├── service/
-├── repository/
-├── entity/
-├── dto/
-├── exception/
-├── config/
-└── OpenBankApplication.java
-```
-
-### Package Responsibilities
-
-| Package      | Responsibility                          |
-| ------------ | --------------------------------------- |
-| `controller` | Handles HTTP requests and responses     |
-| `service`    | Contains business logic                 |
-| `repository` | Handles database operations             |
-| `entity`     | Represents database entities            |
-| `dto`        | Contains API request/response objects   |
-| `exception`  | Reserved for application error handling |
-| `config`     | Contains application configuration      |
-
----
-
-# Current Progress
-
-## Day 1 — Backend Foundation
-
-Completed:
-
-* Spring Boot project created
-* Maven configuration
-* Backend package structure
-* PostgreSQL database configuration
-* JPA/Hibernate configuration
-* Spring Security basic configuration
-* Health API
-* Application information API
-* Postman testing
-* Git repository setup
-
-### Health API
-
-```http
-GET /health
-```
-
-Response:
-
-```json
-{
-  "status": "UP"
-}
-```
-
-### Application Information API
-
-```http
-GET /api/info
-```
-
-Response:
-
-```json
-{
-  "application": "OpenBank Consent Hub",
-  "version": "1.0.0",
-  "status": "Development"
-}
+    |
+    | Exception
+    ↓
+GlobalExceptionHandler
+    |
+    ↓
+HTTP Error Response
 ```
 
 ---
 
-# Day 2 — Customer Management
-
-Customer CRUD APIs have been implemented.
-
-## Customer Entity
-
-The current Customer entity contains:
+# Project Structure
 
 ```text
-id
-name
-email
-phone
-createdAt
-```
-
-## Customer APIs
-
-### Create Customer
-
-```http
-POST /api/customers
-```
-
-Example request:
-
-```json
-{
-  "name": "Madhan",
-  "email": "madhan@example.com",
-  "phone": "9876543210"
-}
-```
-
-### Get All Customers
-
-```http
-GET /api/customers
-```
-
-### Get Customer by ID
-
-```http
-GET /api/customers/{id}
-```
-
-### Update Customer
-
-```http
-PUT /api/customers/{id}
-```
-
-### Partially Update Customer
-
-```http
-PATCH /api/customers/{id}
-```
-
-### Delete Customer
-
-```http
-DELETE /api/customers/{id}
+openbank/
+│
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/
+│   │   │       └── example/
+│   │   │           └── openbank/
+│   │   │               │
+│   │   │               ├── controller/
+│   │   │               │   ├── HealthController.java
+│   │   │               │   ├── InfoController.java
+│   │   │               │   ├── CustomerController.java
+│   │   │               │   ├── AccountController.java
+│   │   │               │   ├── TransactionController.java
+│   │   │               │   ├── BeneficiaryController.java
+│   │   │               │   └── ConsentController.java
+│   │   │               │
+│   │   │               ├── dto/
+│   │   │               │   ├── CreateCustomerRequest.java
+│   │   │               │   ├── UpdateCustomerRequest.java
+│   │   │               │   ├── CreateAccountRequest.java
+│   │   │               │   ├── UpdateAccountRequest.java
+│   │   │               │   ├── CreateTransactionRequest.java
+│   │   │               │   ├── CreateBeneficiaryRequest.java
+│   │   │               │   ├── UpdateBeneficiaryRequest.java
+│   │   │               │   ├── CreateConsentRequest.java
+│   │   │               │   └── UpdateConsentRequest.java
+│   │   │               │
+│   │   │               ├── entity/
+│   │   │               │   ├── Customer.java
+│   │   │               │   ├── Account.java
+│   │   │               │   ├── Transaction.java
+│   │   │               │   ├── Beneficiary.java
+│   │   │               │   └── Consent.java
+│   │   │               │
+│   │   │               ├── repository/
+│   │   │               │   ├── CustomerRepository.java
+│   │   │               │   ├── AccountRepository.java
+│   │   │               │   ├── TransactionRepository.java
+│   │   │               │   ├── BeneficiaryRepository.java
+│   │   │               │   └── ConsentRepository.java
+│   │   │               │
+│   │   │               ├── service/
+│   │   │               │   ├── CustomerService.java
+│   │   │               │   ├── AccountService.java
+│   │   │               │   ├── TransactionService.java
+│   │   │               │   ├── BeneficiaryService.java
+│   │   │               │   └── ConsentService.java
+│   │   │               │
+│   │   │               ├── exception/
+│   │   │               │   ├── CustomerNotFoundException.java
+│   │   │               │   ├── AccountNotFoundException.java
+│   │   │               │   ├── TransactionNotFoundException.java
+│   │   │               │   ├── BeneficiaryNotFoundException.java
+│   │   │               │   ├── ConsentNotFoundException.java
+│   │   │               │   ├── BusinessException.java
+│   │   │               │   └── GlobalExceptionHandler.java
+│   │   │               │
+│   │   │               └── config/
+│   │   │                   └── SecurityConfig.java
+│   │   │
+│   │   └── resources/
+│   │       └── application.properties
+│   │
+│   ├── test/
+│   │
+│   └── ...
+│
+├── pom.xml
+├── .gitignore
+└── README.md
 ```
 
 ---
 
-# Day 2 — Account Management
+# Database
 
-Account management APIs have been implemented.
+The application uses PostgreSQL.
 
-## Account Entity
-
-The current Account entity contains:
+### Database
 
 ```text
-id
-accountNumber
-accountType
-balance
-status
-customer
-createdAt
+openbank
 ```
 
-The Account entity has a relationship with Customer:
+### Configuration
+
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/openbank
+spring.datasource.username=postgres
+spring.datasource.password=YOUR_PASSWORD
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+```
+
+> Do not commit the real database password to GitHub.
+
+---
+
+# Domain Model
+
+The current database relationships are:
 
 ```text
 Customer
    |
-   | 1
-   |
-   | *
-   v
+   | 1:N
+   ↓
 Account
-```
-
-A single customer can have multiple accounts.
-
----
-
-## Account APIs
-
-### Create Account
-
-```http
-POST /api/accounts
-```
-
-Example request:
-
-```json
-{
-  "accountNumber": "ACC10001",
-  "accountType": "SAVINGS",
-  "customerId": 1
-}
-```
-
-A newly created account starts with:
-
-```text
-balance = 0
-status = ACTIVE
-```
-
----
-
-### Get All Accounts
-
-```http
-GET /api/accounts
-```
-
----
-
-### Get Account by ID
-
-```http
-GET /api/accounts/{id}
-```
-
----
-
-### Get Accounts by Customer
-
-```http
-GET /api/accounts/customer/{customerId}
-```
-
----
-
-### Update Account
-
-```http
-PUT /api/accounts/{id}
-```
-
-Example:
-
-```json
-{
-  "accountType": "CURRENT",
-  "status": "ACTIVE"
-}
-```
-
----
-
-### Partially Update Account
-
-```http
-PATCH /api/accounts/{id}
-```
-
-Example:
-
-```json
-{
-  "status": "ACTIVE"
-}
-```
-
----
-
-### Close Account
-
-```http
-DELETE /api/accounts/{id}
-```
-
-The current implementation does not physically remove the account.
-
-Instead, the account status is changed:
-
-```text
-ACTIVE
    |
-   v
-CLOSED
-```
+   | 1:N
+   ↓
+Transaction
 
-This preserves the account record for future banking transaction history.
 
----
-
-# Database Design
-
-Current database relationships:
-
-```text
 Customer
    |
-   | 1
+   | 1:N
+   ↓
+Beneficiary
+
+
+Customer
    |
-   | *
-   v
-Account
+   | 1:N
+   ↓
+Consent
 ```
 
-Current tables:
+---
+
+# 1. Customer Management
+
+Customer represents a bank customer.
+
+### Customer fields
 
 ```text
-customers
--------------------------
 id
 name
 email
 phone
 created_at
+```
 
+### APIs
 
-accounts
--------------------------
+| Method | Endpoint              | Description                                       |
+| ------ | --------------------- | ------------------------------------------------- |
+| POST   | `/api/customers`      | Create customer                                   |
+| GET    | `/api/customers`      | Get all customers                                 |
+| GET    | `/api/customers/{id}` | Get customer                                      |
+| PUT    | `/api/customers/{id}` | Update customer                                   |
+| DELETE | `/api/customers/{id}` | Delete/close customer according to implementation |
+
+### Validation
+
+Customer request validation includes:
+
+```text
+Name
+    ↓
+@NotBlank
+
+Email
+    ↓
+@NotBlank
+@Email
+
+Phone
+    ↓
+@NotBlank
+@Pattern
+```
+
+Example:
+
+```json
+{
+    "name": "Madhan",
+    "email": "madhan@gmail.com",
+    "phone": "9876543210"
+}
+```
+
+---
+
+# 2. Account Management
+
+Account represents a customer's bank account.
+
+### Account fields
+
+```text
 id
 account_number
 account_type
@@ -379,100 +304,520 @@ customer_id
 created_at
 ```
 
-`accounts.customer_id` is a foreign key referencing:
+### APIs
+
+| Method | Endpoint                              | Description             |
+| ------ | ------------------------------------- | ----------------------- |
+| POST   | `/api/accounts`                       | Create account          |
+| GET    | `/api/accounts`                       | Get all accounts        |
+| GET    | `/api/accounts/{id}`                  | Get account             |
+| GET    | `/api/accounts/customer/{customerId}` | Get customer's accounts |
+| PUT    | `/api/accounts/{id}`                  | Update account          |
+| DELETE | `/api/accounts/{id}`                  | Close account           |
+
+### Important business rule
+
+Account balance is not directly changed through account update APIs.
+
+Balance changes through transactions.
+
+Account deletion is implemented as a logical close:
 
 ```text
-customers.id
+ACTIVE → CLOSED
+```
+
+This preserves banking history.
+
+### Validation
+
+```text
+accountNumber → @NotBlank
+accountType   → @NotBlank
+customerId    → @NotNull
 ```
 
 ---
 
-# Account Design Decision
+# 3. Transaction Management
 
-Account balance is not directly modified through the Account update APIs.
+Transactions record deposits and withdrawals.
 
-The balance will be changed through the Transaction module.
-
-For example:
+### Transaction fields
 
 ```text
-Deposit
-   |
-   v
-Transaction
-   |
-   v
-Update Account Balance
+id
+account_id
+type
+amount
+balance_after
+description
+transaction_date
 ```
 
-This prevents a client from directly sending:
+### APIs
+
+| Method | Endpoint                                | Description              |
+| ------ | --------------------------------------- | ------------------------ |
+| POST   | `/api/transactions`                     | Create transaction       |
+| GET    | `/api/transactions`                     | Get all transactions     |
+| GET    | `/api/transactions/{id}`                | Get transaction          |
+| GET    | `/api/transactions/account/{accountId}` | Get account transactions |
+
+### Supported transaction types
+
+```text
+DEPOSIT
+WITHDRAWAL
+```
+
+### Transaction validation
+
+```text
+accountId
+    ↓
+@NotNull
+
+type
+    ↓
+@NotBlank
+
+amount
+    ↓
+@NotNull
+@DecimalMin("0.01")
+```
+
+### Business rules
+
+* Closed accounts cannot perform transactions.
+* Amount must be greater than zero.
+* Withdrawal cannot exceed account balance.
+* Transaction type must be `DEPOSIT` or `WITHDRAWAL`.
+
+### Transaction safety
+
+The transaction creation operation uses:
+
+```java
+@Transactional
+```
+
+This ensures the account balance update and transaction insertion are treated as one database transaction.
+
+---
+
+# 4. Beneficiary Management
+
+A beneficiary represents an external bank account registered by a customer.
+
+### Beneficiary fields
+
+```text
+id
+name
+account_number
+bank_name
+ifsc_code
+customer_id
+created_at
+status
+```
+
+### APIs
+
+| Method | Endpoint                                   | Description                  |
+| ------ | ------------------------------------------ | ---------------------------- |
+| POST   | `/api/beneficiaries`                       | Create beneficiary           |
+| GET    | `/api/beneficiaries`                       | Get all beneficiaries        |
+| GET    | `/api/beneficiaries/{id}`                  | Get beneficiary              |
+| GET    | `/api/beneficiaries/customer/{customerId}` | Get customer's beneficiaries |
+| PUT    | `/api/beneficiaries/{id}`                  | Update beneficiary           |
+| PATCH  | `/api/beneficiaries/{id}`                  | Partially update beneficiary |
+| DELETE | `/api/beneficiaries/{id}`                  | Deactivate beneficiary       |
+
+### Validation
+
+```text
+customerId
+    ↓
+@NotNull
+
+name
+    ↓
+@NotBlank
+@Size
+
+accountNumber
+    ↓
+@NotBlank
+@Pattern
+
+bankName
+    ↓
+@NotBlank
+
+ifscCode
+    ↓
+@NotBlank
+@Pattern
+```
+
+### Beneficiary status
+
+```text
+ACTIVE
+   ↓
+INACTIVE
+```
+
+Deletion is implemented as a logical deactivation to preserve the beneficiary record.
+
+---
+
+# 5. Consent Management
+
+Consent Management is the core Open Banking feature of the application.
+
+A consent represents permission for access to specified customer data.
+
+### Consent fields
+
+```text
+id
+customer_id
+purpose
+data_access
+status
+created_at
+updated_at
+expires_at
+```
+
+### Consent status
+
+```text
+PENDING
+APPROVED
+REJECTED
+EXPIRED
+```
+
+Current implemented lifecycle:
+
+```text
+              ┌───────────┐
+              │  PENDING  │
+              └─────┬─────┘
+                    / \
+                   /   \
+                  ↓     ↓
+             APPROVED  REJECTED
+```
+
+### APIs
+
+| Method | Endpoint                              | Description            |
+| ------ | ------------------------------------- | ---------------------- |
+| POST   | `/api/consents`                       | Create consent         |
+| GET    | `/api/consents`                       | Get all consents       |
+| GET    | `/api/consents/{id}`                  | Get consent            |
+| GET    | `/api/consents/customer/{customerId}` | Get customer consents  |
+| PUT    | `/api/consents/{id}`                  | Approve/reject consent |
+
+### Create Consent
+
+```http
+POST /api/consents
+```
 
 ```json
 {
-  "balance": 999999
+    "customerId": 1,
+    "purpose": "Account Information Access",
+    "dataAccess": "ACCOUNT",
+    "expiresAt": "2026-12-31T23:59:59"
 }
 ```
 
-and changing the account balance without a corresponding banking transaction.
+A newly created consent automatically receives:
+
+```text
+status = PENDING
+```
+
+### Approve Consent
+
+```http
+PUT /api/consents/1
+```
+
+```json
+{
+    "status": "APPROVED"
+}
+```
+
+### Reject Consent
+
+```http
+PUT /api/consents/2
+```
+
+```json
+{
+    "status": "REJECTED"
+}
+```
+
+### Consent validation
+
+```text
+customerId
+    ↓
+@NotNull
+
+purpose
+    ↓
+@NotBlank
+
+dataAccess
+    ↓
+@NotBlank
+
+expiresAt
+    ↓
+@Future
+```
+
+Update validation:
+
+```text
+status
+    ↓
+@NotBlank
+@Pattern
+    ↓
+APPROVED or REJECTED
+```
+
+### Consent business rule
+
+Only a `PENDING` consent can be approved or rejected.
+
+```text
+PENDING → APPROVED    ✅
+PENDING → REJECTED    ✅
+
+APPROVED → REJECTED   ❌
+REJECTED → APPROVED   ❌
+```
 
 ---
 
-# Current API Summary
+# Validation Architecture
 
-## Customer
+Bean Validation is used at the DTO layer.
 
-```text
-POST   /api/customers
-GET    /api/customers
-GET    /api/customers/{id}
-PUT    /api/customers/{id}
-PATCH  /api/customers/{id}
-DELETE /api/customers/{id}
+Example:
+
+```java
+@Valid
+@RequestBody CreateCustomerRequest request
 ```
 
-## Account
+Validation annotations include:
 
 ```text
-POST   /api/accounts
-GET    /api/accounts
-GET    /api/accounts/{id}
-GET    /api/accounts/customer/{customerId}
-PUT    /api/accounts/{id}
-PATCH  /api/accounts/{id}
-DELETE /api/accounts/{id}
+@NotBlank
+@NotNull
+@Email
+@Pattern
+@Size
+@DecimalMin
+@Future
+```
+
+### Validation flow
+
+```text
+Postman
+   ↓
+HTTP Request
+   ↓
+Controller
+   ↓
+@RequestBody
+   ↓
+DTO
+   ↓
+@Valid
+   ↓
+Bean Validation
+   ↓
+Valid?
+ ┌─┴───────────┐
+ │             │
+YES            NO
+ │             │
+ ↓             ↓
+Service    MethodArgumentNotValidException
+ │             │
+ ↓             ↓
+Database   GlobalExceptionHandler
+             │
+             ↓
+          HTTP 400
 ```
 
 ---
 
-# Local Setup
+# Exception Handling
 
-## Prerequisites
+The application uses custom exceptions instead of generic exceptions for important cases.
 
-Install:
+Current custom exceptions:
 
-* Java 21
-* Maven
-* PostgreSQL
-* Postman
-* Git
+```text
+CustomerNotFoundException
+AccountNotFoundException
+TransactionNotFoundException
+BeneficiaryNotFoundException
+ConsentNotFoundException
+BusinessException
+```
 
-## Create Database
+All are handled centrally using:
 
-Create the PostgreSQL database:
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler
+```
+
+### Example error response
+
+```json
+{
+    "status": 404,
+    "message": "Customer not found with id: 10",
+    "timestamp": "2026-09-30T10:30:00"
+}
+```
+
+### Validation error response
+
+```json
+{
+    "status": 400,
+    "message": "Validation failed",
+    "errors": {
+        "email": "Email must be valid",
+        "phone": "Phone number must contain exactly 10 digits"
+    },
+    "timestamp": "2026-09-30T10:30:00"
+}
+```
+
+---
+
+# API Testing
+
+Postman is currently used for API testing.
+
+Testing includes:
+
+* Valid requests
+* Missing required fields
+* Invalid email
+* Invalid phone number
+* Invalid account number
+* Invalid IFSC code
+* Invalid transaction amount
+* Invalid transaction type
+* Non-existent customer
+* Non-existent account
+* Non-existent transaction
+* Non-existent beneficiary
+* Non-existent consent
+* Invalid consent status
+* Invalid consent lifecycle transitions
+* Insufficient account balance
+* Closed account transaction attempts
+
+---
+
+# Initial Security Configuration
+
+Spring Security has been added to the project.
+
+Currently:
+
+```text
+/health
+/api/info
+```
+
+are publicly accessible.
+
+Other APIs require authentication under the current security configuration.
+
+Full authentication and authorization using Keycloak will be implemented in a later phase.
+
+---
+
+# Health Check
+
+### API
+
+```http
+GET /health
+```
+
+Response:
+
+```json
+{
+    "status": "UP"
+}
+```
+
+---
+
+# Application Information
+
+### API
+
+```http
+GET /api/info
+```
+
+Response:
+
+```json
+{
+    "application": "OpenBank Consent Hub",
+    "version": "1.0.0",
+    "status": "Development"
+}
+```
+
+---
+
+# How to Run
+
+## 1. Start PostgreSQL
+
+Make sure PostgreSQL is running.
+
+Create the database:
 
 ```sql
 CREATE DATABASE openbank;
 ```
 
-## Configure Database
+---
 
-Update:
-
-```text
-src/main/resources/application.properties
-```
-
-Example:
+## 2. Configure `application.properties`
 
 ```properties
 spring.application.name=openbank
@@ -486,227 +831,171 @@ spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 ```
 
-Replace `YOUR_PASSWORD` with the local PostgreSQL password.
-
-Do not commit real credentials to GitHub.
-
 ---
 
-# Running the Application
+## 3. Run the application
 
-Start the Spring Boot application using IntelliJ or:
+Using Maven:
 
 ```bash
 mvn spring-boot:run
 ```
 
-The application currently runs on:
+The application runs on:
 
 ```text
 http://localhost:8081
 ```
 
-if port `8081` is configured.
-
 ---
 
-# Testing
+# Future Development
 
-The APIs are being tested using Postman.
+The following features are planned for the next phases.
 
-Example:
+## Phase 1 — Backend Completion
 
-```http
-GET http://localhost:8081/health
-```
+* [x] Customer Management
+* [x] Account Management
+* [x] Transaction Management
+* [x] Beneficiary Management
+* [x] Consent Management
+* [x] DTOs
+* [x] Bean Validation
+* [x] Custom Exceptions
+* [x] Global Exception Handling
 
-```http
-GET http://localhost:8081/api/info
-```
+## Phase 2 — Authentication and Authorization
 
-Customer:
+* [ ] Keycloak setup
+* [ ] JWT authentication
+* [ ] OAuth2/OIDC
+* [ ] Role-Based Access Control
+* [ ] CUSTOMER role
+* [ ] MAKER role
+* [ ] CHECKER role
+* [ ] ADMIN role
+* [ ] Secure API endpoints
 
-```http
-POST http://localhost:8081/api/customers
-```
-
-Account:
-
-```http
-POST http://localhost:8081/api/accounts
-```
-
----
-
-# Project Status
-
-### Completed
-
-* [x] Spring Boot project setup
-* [x] Backend package structure
-* [x] PostgreSQL configuration
-* [x] JPA/Hibernate configuration
-* [x] Health API
-* [x] Application Info API
-* [x] Customer Entity
-* [x] Customer Repository
-* [x] Customer Service
-* [x] Customer Controller
-* [x] Customer CRUD APIs
-* [x] Account Entity
-* [x] Account Repository
-* [x] Account Service
-* [x] Account Controller
-* [x] Account CRUD/update APIs
-* [x] Customer-Account relationship
-* [x] Postman testing
-
-### Not Yet Implemented
-
-* [ ] Transaction management
-* [ ] Beneficiary management
-* [ ] Request validation
-* [ ] Custom exceptions
-* [ ] Global exception handling
-* [ ] Consent management
-* [ ] Consent expiry
-* [ ] Consent audit trail
-* [ ] Maker-Checker workflow
-* [ ] Keycloak authentication
-* [ ] JWT authorization
-* [ ] Role-based access control
-* [ ] React frontend
-* [ ] Nginx gateway
-* [ ] Docker
-* [ ] Docker Compose
-
----
-
-# Planned Roles
-
-The final system will use four roles:
+## Phase 3 — Maker/Checker Workflow
 
 ```text
-CUSTOMER
 MAKER
+  ↓
+Create Consent
+  ↓
+PENDING
+  ↓
 CHECKER
-ADMIN
+  ↓
+APPROVE / REJECT
 ```
 
-Role-based authorization will be implemented later using Keycloak and Spring Security.
+## Phase 4 — React Frontend
 
-The current backend APIs are still under development and are not yet protected by the final role-based authorization system.
+Planned frontend features:
 
----
+* Login
+* Customer dashboard
+* Account dashboard
+* Transaction history
+* Beneficiary management
+* Consent management
+* Maker dashboard
+* Checker dashboard
+* Admin dashboard
 
-# Planned Project Flow
+## Phase 5 — Nginx
 
-The final application is planned to follow:
+Planned architecture:
 
 ```text
-User
-  |
-  v
-React Frontend
-  |
-  v
-Nginx
-  |
-  +------------------+
-  |                  |
-  v                  v
-Spring Boot       Keycloak
-  |
-  v
-Spring Security
-  |
-  v
-Controller
-  |
-  v
-Service
-  |
-  v
-Repository
-  |
-  v
-Hibernate / JPA
-  |
-  v
-PostgreSQL
+             Client
+                |
+                ↓
+              Nginx
+           /    |    \
+          /     |     \
+       React  Backend  Keycloak
+                 |
+                 ↓
+             PostgreSQL
 ```
+
+## Phase 6 — Docker
+
+Planned Docker Compose services:
+
+```text
+React
+Spring Boot
+PostgreSQL
+Keycloak
+Nginx
+```
+
+## Phase 7 — Final Testing and Documentation
+
+* [ ] Integration testing
+* [ ] Security testing
+* [ ] API documentation
+* [ ] Docker deployment
+* [ ] Final project demonstration
+* [ ] Project presentation
 
 ---
 
-# Upcoming Development
+# Development Progress
 
-## Day 3
+```text
+Customer              ████████████████████ 100%
+Customer Validation   ████████████████████ 100%
 
-Transaction and Beneficiary management.
+Account               ████████████████████ 100%
+Account Validation    ████████████████████ 100%
 
-Planned transaction features:
+Transaction           ████████████████████ 100%
+Transaction Validation████████████████████ 100%
 
-* Deposit
-* Withdrawal
-* Balance validation
-* Insufficient balance handling
-* Transaction history
-* Atomic database operations
+Beneficiary           ████████████████████ 100%
+Beneficiary Validation████████████████████ 100%
 
-Planned beneficiary features:
+Consent               ████████████████████ 100%
+Consent Validation    ████████████████████ 100%
 
-* Create beneficiary
-* View beneficiaries
-* Update beneficiary
-* Delete beneficiary
-
-## Day 4
-
-* Request validation
-* Custom exceptions
-* Global exception handling
-* Proper API error responses
-
-## Day 5
-
-Open Banking Consent Management:
-
-* Consent creation
-* Purpose
-* Data scope
-* Consent status
-* Expiry
-* Maker-Checker workflow
-* Approval/rejection
-* Audit trail
-
-## Later Stages
-
-* React frontend
-* Keycloak
-* JWT
-* Role-based authorization
-* Nginx
-* Docker Compose
-* Full system integration
+Keycloak              ░░░░░░░░░░░░░░░░░░░░   0%
+React Frontend        ░░░░░░░░░░░░░░░░░░░░   0%
+Nginx                 ░░░░░░░░░░░░░░░░░░░░   0%
+Docker Compose        ░░░░░░░░░░░░░░░░░░░░   0%
+```
 
 ---
 
 # Project Goal
 
-The final goal is to build a secure Open Banking Consent Management System that demonstrates:
+The final goal is to build a secure Open Banking Consent Management platform with:
 
-* REST API development
-* Spring Boot
-* JPA/Hibernate
-* PostgreSQL
-* Banking business logic
-* Secure authentication
-* Role-based authorization
-* Maker-Checker workflow
-* Fine-grained consent
-* Consent expiry
-* Audit trail
-* Frontend-backend integration
-* API gateway
-* Containerization
+```text
+                    OpenBank Consent Hub
+
+                           Client
+                             |
+                             ↓
+                           Nginx
+                             |
+              ┌──────────────┼──────────────┐
+              ↓              ↓              ↓
+           React         Spring Boot     Keycloak
+                            |
+             ┌──────────────┼──────────────┐
+             ↓              ↓              ↓
+          Customer       Account        Consent
+             |              |
+             ↓              ↓
+        Beneficiary     Transaction
+                            |
+                            ↓
+                       PostgreSQL
+```
+
+The completed system will combine banking operations, consent management, authentication, authorization, and a modern web frontend into a single Open Banking application.
