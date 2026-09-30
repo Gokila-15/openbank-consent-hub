@@ -4,6 +4,8 @@ import com.example.openbank.dto.CreateTransactionRequest;
 import com.example.openbank.entity.Transaction;
 import com.example.openbank.service.TransactionService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,17 +24,17 @@ public class TransactionController {
         this.transactionService = transactionService;
     }
 
-    @PostMapping
-    public ResponseEntity<Transaction> createTransaction(
-            @RequestBody CreateTransactionRequest request) {
+@PostMapping
+public ResponseEntity<Transaction> createTransaction(
+        @Valid @RequestBody CreateTransactionRequest request) {
 
-        Transaction transaction =
-                transactionService.createTransaction(request);
+    Transaction transaction =
+            transactionService.createTransaction(request);
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(transaction);
-    }
+    return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(transaction);
+}
 
     @GetMapping
     public ResponseEntity<List<Transaction>> getAllTransactions() {
