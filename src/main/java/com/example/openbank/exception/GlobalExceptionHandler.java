@@ -12,20 +12,30 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomerNotFoundException.class)
-    public ResponseEntity<String> handleCustomerNotFound(
-            CustomerNotFoundException ex) {
+public ResponseEntity<Map<String, Object>> handleCustomerNotFound(
+        CustomerNotFoundException ex) {
 
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(ex.getMessage());
-    }
-    @ExceptionHandler(AccountNotFoundException.class)
-public ResponseEntity<String> handleAccountNotFound(
+    return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body(Map.of(
+                    "status", 404,
+                    "message", ex.getMessage(),
+                    "timestamp", LocalDateTime.now()
+            ));
+}
+
+
+@ExceptionHandler(AccountNotFoundException.class)
+public ResponseEntity<Map<String, Object>> handleAccountNotFound(
         AccountNotFoundException ex) {
 
     return ResponseEntity
             .status(HttpStatus.NOT_FOUND)
-            .body(ex.getMessage());
+            .body(Map.of(
+                    "status", 404,
+                    "message", ex.getMessage(),
+                    "timestamp", LocalDateTime.now()
+            ));
 }
    @ExceptionHandler(BeneficiaryNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleBeneficiaryNotFound(

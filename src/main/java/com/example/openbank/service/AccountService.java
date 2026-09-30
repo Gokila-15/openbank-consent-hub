@@ -31,10 +31,12 @@ public class AccountService {
     public Account createAccount(CreateAccountRequest request) {
 
         // Check whether customer exists
-        Customer customer = customerRepository
-                .findById(request.getCustomerId())
-                .orElseThrow(() ->
-                        new RuntimeException("Customer not found"));
+       Customer customer = customerRepository
+            .findById(request.getCustomerId())
+            .orElseThrow(() ->
+                    new CustomerNotFoundException(
+                            "Customer not found with id: "
+                                    + request.getCustomerId()));
 
         // Check duplicate account number
         if (accountRepository.existsByAccountNumber(

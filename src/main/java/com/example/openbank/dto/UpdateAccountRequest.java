@@ -1,8 +1,13 @@
 package com.example.openbank.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class UpdateAccountRequest {
 
+    @NotBlank(message = "Account type is required")
     private String accountType;
+
+    @NotBlank(message = "Status is required")
     private String status;
 
     public UpdateAccountRequest() {
