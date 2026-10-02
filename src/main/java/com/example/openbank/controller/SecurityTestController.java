@@ -17,4 +17,9 @@ public class SecurityTestController {
     public String makerTest() {
         return "MAKER access granted";
 }
+ @GetMapping("/api/test/checker")
+    @PreAuthorize("hasRole('CHECKER')")
+    public String checkerTest() {
+        return "CHECKER access granted";
+    }
 }
