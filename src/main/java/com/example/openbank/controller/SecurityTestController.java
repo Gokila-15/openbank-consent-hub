@@ -12,4 +12,9 @@ public class SecurityTestController {
     public String customerTest() {
         return "CUSTOMER access granted";
     }
+    @GetMapping("/api/test/maker")
+    @PreAuthorize("hasRole('MAKER')")
+    public String makerTest() {
+        return "MAKER access granted";
+}
 }
