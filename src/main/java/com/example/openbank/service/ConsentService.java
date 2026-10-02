@@ -91,6 +91,7 @@ public class ConsentService {
             throw new BusinessException(
                     "Only PENDING consent can be approved or rejected");
         }
+        if (!"APPROVED".equals(request.getStatus()) && !"REJECTED".equals(request.getStatus())) { throw new BusinessException( "Consent status must be APPROVED or REJECTED"); }
 
         consent.setStatus(request.getStatus());
 

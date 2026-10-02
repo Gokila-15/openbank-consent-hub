@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +27,7 @@ public class ConsentController {
 
     // CREATE CONSENT
     @PostMapping
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'MAKER', 'ADMIN')")
     public ResponseEntity<Consent> createConsent(
             @Valid @RequestBody CreateConsentRequest request) {
 
@@ -40,6 +42,7 @@ public class ConsentController {
 
     // GET ALL CONSENTS
     @GetMapping
+    @PreAuthorize("hasAnyRole('MAKER', 'CHECKER', 'ADMIN')")
     public ResponseEntity<List<Consent>> getAllConsents() {
 
         return ResponseEntity.ok(
@@ -50,6 +53,7 @@ public class ConsentController {
 
     // GET CONSENT BY ID
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'MAKER', 'CHECKER', 'ADMIN')")
     public ResponseEntity<Consent> getConsentById(
             @PathVariable Long id) {
 
@@ -61,6 +65,7 @@ public class ConsentController {
 
     // GET CONSENTS BY CUSTOMER
     @GetMapping("/customer/{customerId}")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'MAKER', 'ADMIN')")
     public ResponseEntity<List<Consent>> getConsentsByCustomer(
             @PathVariable Long customerId) {
 
@@ -72,6 +77,7 @@ public class ConsentController {
 
     // APPROVE / REJECT CONSENT
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('CHECKER', 'ADMIN')")
     public ResponseEntity<Consent> updateConsent(
             @PathVariable Long id,
             @Valid @RequestBody UpdateConsentRequest request) {
@@ -81,3 +87,4 @@ public class ConsentController {
         );
     }
 }
+

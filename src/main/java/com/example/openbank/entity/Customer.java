@@ -22,7 +22,7 @@ public class Customer {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
-
+    
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
