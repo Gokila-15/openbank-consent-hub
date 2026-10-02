@@ -22,4 +22,9 @@ public class SecurityTestController {
     public String checkerTest() {
         return "CHECKER access granted";
     }
+     @GetMapping("/api/test/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String adminTest() {
+        return "ADMIN access granted";
+    }
 }
