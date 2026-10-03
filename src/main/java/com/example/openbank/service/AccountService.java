@@ -6,7 +6,10 @@ import com.example.openbank.entity.Account;
 import com.example.openbank.entity.Customer;
 import com.example.openbank.repository.AccountRepository;
 import com.example.openbank.repository.CustomerRepository;
+
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+
 import com.example.openbank.exception.AccountNotFoundException;
 import com.example.openbank.exception.BusinessException;
 import com.example.openbank.exception.CustomerNotFoundException;
@@ -31,12 +34,12 @@ public class AccountService {
     public Account createAccount(CreateAccountRequest request) {
 
         // Check whether customer exists
-       Customer customer = customerRepository
-            .findById(request.getCustomerId())
-            .orElseThrow(() ->
-                    new CustomerNotFoundException(
-                            "Customer not found with id: "
-                                    + request.getCustomerId()));
+        Customer customer = customerRepository
+                .findById(request.getCustomerId())
+                .orElseThrow(() ->
+                        new CustomerNotFoundException(
+                                "Customer not found with id: "
+                                        + request.getCustomerId()));
 
         // Check duplicate account number
         if (accountRepository.existsByAccountNumber(
@@ -68,61 +71,144 @@ public class AccountService {
     }
 
     // GET BY ID
-   public Account getAccountById(Long id) {
+    public Account getAccountById(
+            Long id,
+            Authentication authentication) {
 
-        return accountRepository.findById(id)
+        Account account = accountRepository.findById(id)
                 .orElseThrow(() ->
                         new AccountNotFoundException(
                                 "Account not found with ID: " + id
                         )
                 );
+
+        /*
+         * Check whether the logged-in user is CUSTOMER.
+         */
+        boolean isCustomer = authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        authority.getAuthority()
+                                .equals("ROLE_CUSTOMER"));
+
+        /*
+         * CUSTOMER can access only their own account.
+         *
+         * MAKER and ADMIN are allowed to access
+         * according to their roles.
+         */
+        if (isCustomer) {
+
+            // Get username from Keycloak JWT
+            String username = authentication.getName();
+
+            // Find logged-in customer
+            Customer loggedInCustomer = customerRepository
+                    .findByUsername(username)
+                    .orElseThrow(() ->
+                            new CustomerNotFoundException(
+                                    "Customer not found for username: "
+                                            + username));
+
+            /*
+             * Compare account owner's ID
+             * with logged-in customer's ID.
+             */
+            if (!account.getCustomer().getId()
+                    .equals(loggedInCustomer.getId())) {
+
+                throw new BusinessException(
+                        "You are not allowed to access this account");
+            }
+        }
+
+        return account;
     }
 
     // GET BY CUSTOMER
-    public List<Account> getAccountsByCustomer(Long customerId) {
+    public List<Account> getAccountsByCustomer(
+            Long customerId,
+            Authentication authentication) {
+
+        /*
+         * Check whether logged-in user is CUSTOMER.
+         */
+        boolean isCustomer = authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        authority.getAuthority()
+                                .equals("ROLE_CUSTOMER"));
+
+        /*
+         * CUSTOMER can request only their own customer ID.
+         */
+        if (isCustomer) {
+
+            String username = authentication.getName();
+
+            // Find logged-in customer
+            Customer loggedInCustomer = customerRepository
+                    .findByUsername(username)
+                    .orElseThrow(() ->
+                            new CustomerNotFoundException(
+                                    "Customer not found for username: "
+                                            + username));
+
+            /*
+             * Compare URL customerId with
+             * authenticated customer's ID.
+             */
+            if (!loggedInCustomer.getId()
+                    .equals(customerId)) {
+
+                throw new BusinessException(
+                        "You are not allowed to access accounts "
+                                + "of another customer");
+            }
+        }
 
         // Make sure customer exists
-       if (!customerRepository.existsById(customerId)) {
+        if (!customerRepository.existsById(customerId)) {
 
-    throw new CustomerNotFoundException(
-            "Customer not found with id: " + customerId
-    );
-}
+            throw new CustomerNotFoundException(
+                    "Customer not found with id: " + customerId
+            );
+        }
 
         return accountRepository.findByCustomerId(customerId);
     }
 
     // PUT
-public Account updateAccount(
-        Long id,
-        UpdateAccountRequest request) {
+    public Account updateAccount(
+            Long id,
+            UpdateAccountRequest request) {
 
-    Account account = getAccountById(id);
+        Account account = getAccountByIdWithoutAuthentication(id);
 
-    if (request.getAccountType() == null ||
-            request.getStatus() == null) {
+        if (request.getAccountType() == null ||
+                request.getStatus() == null) {
 
-        throw new BusinessException(
-                "PUT requires accountType and status");
+            throw new BusinessException(
+                    "PUT requires accountType and status");
+        }
+
+        account.setAccountType(
+                request.getAccountType());
+
+        account.setStatus(
+                request.getStatus());
+
+        return accountRepository.save(account);
     }
-
-    account.setAccountType(
-            request.getAccountType());
-
-    account.setStatus(
-            request.getStatus());
-
-    return accountRepository.save(account);
-}
-
-   
 
     // DELETE / CLOSE ACCOUNT
     public Account closeAccount(Long id) {
 
-        Account account = getAccountById(id);
+        Account account =
+                getAccountByIdWithoutAuthentication(id);
 
         if ("CLOSED".equals(account.getStatus())) {
+
             throw new RuntimeException(
                     "Account is already closed");
         }
@@ -130,5 +216,18 @@ public Account updateAccount(
         account.setStatus("CLOSED");
 
         return accountRepository.save(account);
+    }
+
+    // INTERNAL METHOD
+    // Used by update and close operations
+    private Account getAccountByIdWithoutAuthentication(
+            Long id) {
+
+        return accountRepository.findById(id)
+                .orElseThrow(() ->
+                        new AccountNotFoundException(
+                                "Account not found with ID: " + id
+                        )
+                );
     }
 }

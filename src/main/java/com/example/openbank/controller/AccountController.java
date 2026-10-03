@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,19 +26,22 @@ public class AccountController {
     }
 
     // POST /api/accounts
- @PostMapping
-public ResponseEntity<Account> createAccount(
-        @Valid @RequestBody CreateAccountRequest request) {
+    @PostMapping
+    @PreAuthorize("hasAnyRole('MAKER', 'ADMIN')")
+    public ResponseEntity<Account> createAccount(
+            @Valid @RequestBody CreateAccountRequest request) {
 
-    Account account = accountService.createAccount(request);
+        Account account =
+                accountService.createAccount(request);
 
-    return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body(account);
-}
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(account);
+    }
 
     // GET /api/accounts
     @GetMapping
+    @PreAuthorize("hasAnyRole('MAKER', 'ADMIN')")
     public ResponseEntity<List<Account>> getAllAccounts() {
 
         return ResponseEntity.ok(
@@ -46,39 +51,49 @@ public ResponseEntity<Account> createAccount(
 
     // GET /api/accounts/{id}
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'MAKER', 'ADMIN')")
     public ResponseEntity<Account> getAccountById(
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            Authentication authentication) {
 
         return ResponseEntity.ok(
-                accountService.getAccountById(id)
+                accountService.getAccountById(
+                        id,
+                        authentication
+                )
         );
     }
 
     // GET /api/accounts/customer/{customerId}
     @GetMapping("/customer/{customerId}")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'MAKER', 'ADMIN')")
     public ResponseEntity<List<Account>> getAccountsByCustomer(
-            @PathVariable Long customerId) {
+            @PathVariable Long customerId,
+            Authentication authentication) {
 
         return ResponseEntity.ok(
-                accountService.getAccountsByCustomer(customerId)
+                accountService.getAccountsByCustomer(
+                        customerId,
+                        authentication
+                )
         );
     }
 
     // PUT /api/accounts/{id}
-@PutMapping("/{id}")
-public ResponseEntity<Account> updateAccount(
-        @PathVariable Long id,
-        @Valid @RequestBody UpdateAccountRequest request) {
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('MAKER', 'ADMIN')")
+    public ResponseEntity<Account> updateAccount(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateAccountRequest request) {
 
-    return ResponseEntity.ok(
-            accountService.updateAccount(id, request)
-    );
-}
-
-    // PATCH /api/accounts/{id}
+        return ResponseEntity.ok(
+                accountService.updateAccount(id, request)
+        );
+    }
 
     // DELETE /api/accounts/{id}
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('MAKER', 'ADMIN')")
     public ResponseEntity<Account> deleteAccount(
             @PathVariable Long id) {
 
