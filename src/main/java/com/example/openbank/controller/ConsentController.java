@@ -88,10 +88,16 @@ public class ConsentController {
     @PreAuthorize("hasAnyRole('CHECKER', 'ADMIN')")
     public ResponseEntity<Consent> updateConsent(
             @PathVariable Long id,
-            @Valid @RequestBody UpdateConsentRequest request) {
+            @Valid @RequestBody UpdateConsentRequest request,
+            Authentication authentication) {
 
         return ResponseEntity.ok(
-                consentService.updateConsent(id, request)
+                consentService.updateConsent(
+                        id,
+                        request,
+                        authentication
+                )
         );
     }
 }
+

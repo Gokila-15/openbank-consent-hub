@@ -25,6 +25,9 @@ public class Consent {
     @Column(nullable = false)
     private String status;
 
+   @Column(name = "created_by", nullable = false)
+   private String createdBy;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -105,4 +108,11 @@ public class Consent {
     public void setExpiresAt(LocalDateTime expiresAt) {
         this.expiresAt = expiresAt;
     }
+    public String getCreatedBy() {
+    return createdBy;
+}
+
+public void setCreatedBy(String createdBy) {
+    this.createdBy = createdBy;
+}
 }

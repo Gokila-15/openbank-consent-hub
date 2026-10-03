@@ -30,37 +30,57 @@ public class ConsentService {
     }
 
     // CREATE CONSENT
-    public Consent createConsent(
-            CreateConsentRequest request,
-            Authentication authentication) {
+public Consent createConsent(
+        CreateConsentRequest request,
+        Authentication authentication) {
 
-        // Get logged-in username from Keycloak JWT
-        String username = authentication.getName();
+    String username = authentication.getName();
 
-        // Find customer using username
-        Customer customer = customerRepository
+    Customer customer;
+
+    // CUSTOMER creates consent
+    if (authentication.getAuthorities()
+            .stream()
+            .anyMatch(authority ->
+                    authority.getAuthority()
+                            .equals("ROLE_CUSTOMER"))) {
+
+        customer = customerRepository
                 .findByUsername(username)
                 .orElseThrow(() ->
                         new CustomerNotFoundException(
                                 "Customer not found for username: "
                                         + username));
-
-        Consent consent = new Consent();
-
-        // Ownership comes from authenticated user
-        // NOT from request.customerId
-        consent.setCustomer(customer);
-
-        consent.setPurpose(request.getPurpose());
-        consent.setDataAccess(request.getDataAccess());
-        consent.setExpiresAt(request.getExpiresAt());
-
-        // Every new consent starts as PENDING
-        consent.setStatus("PENDING");
-
-        return consentRepository.save(consent);
     }
 
+    // MAKER / ADMIN creates consent
+    else {
+
+        customer = customerRepository
+                .findById(request.getCustomerId())
+                .orElseThrow(() ->
+                        new CustomerNotFoundException(
+                                "Customer not found with id: "
+                                        + request.getCustomerId()));
+    }
+
+    Consent consent = new Consent();
+
+    // Customer whose consent is being created
+    consent.setCustomer(customer);
+
+    // Actual user who created the consent
+    consent.setCreatedBy(username);
+
+    consent.setPurpose(request.getPurpose());
+    consent.setDataAccess(request.getDataAccess());
+    consent.setExpiresAt(request.getExpiresAt());
+
+    // Every new consent starts as PENDING
+    consent.setStatus("PENDING");
+
+    return consentRepository.save(consent);
+}
     // GET ALL CONSENTS
     public List<Consent> getAllConsents() {
 
@@ -156,11 +176,7 @@ public class ConsentService {
         }
 
         /*
-         * For CUSTOMER:
-         * customerId must belong to logged-in user.
-         *
-         * For MAKER / ADMIN:
-         * they can access the requested customer.
+         * Verify that the customer exists.
          */
         if (!customerRepository.existsById(customerId)) {
 
@@ -174,19 +190,52 @@ public class ConsentService {
     // APPROVE / REJECT CONSENT
     public Consent updateConsent(
             Long id,
-            UpdateConsentRequest request) {
+            UpdateConsentRequest request,
+            Authentication authentication) {
 
+        /*
+         * Find the consent.
+         */
         Consent consent =
                 getConsentByIdWithoutAuthentication(id);
 
-        // Only PENDING consent can be processed
+        /*
+         * Only PENDING consents can be
+         * approved or rejected.
+         */
         if (!"PENDING".equals(consent.getStatus())) {
 
             throw new BusinessException(
                     "Only PENDING consent can be approved or rejected");
         }
 
-        // Only APPROVED or REJECTED are valid
+        /*
+         * Get the currently logged-in user.
+         */
+        String username = authentication.getName();
+
+        /*
+         * SELF-APPROVAL PREVENTION
+         *
+         * Compare:
+         *
+         * consent.createdBy
+         *        vs
+         * currently logged-in username
+         *
+         * If they are the same user,
+         * block the operation.
+         */
+        if (consent.getCreatedBy().equals(username)) {
+
+            throw new BusinessException(
+                    "You cannot approve or reject your own consent");
+        }
+
+        /*
+         * Only APPROVED or REJECTED
+         * are valid final statuses.
+         */
         if (!"APPROVED".equals(request.getStatus())
                 && !"REJECTED".equals(request.getStatus())) {
 
@@ -194,6 +243,9 @@ public class ConsentService {
                     "Consent status must be APPROVED or REJECTED");
         }
 
+        /*
+         * Update the consent status.
+         */
         consent.setStatus(request.getStatus());
 
         return consentRepository.save(consent);
@@ -210,3 +262,4 @@ public class ConsentService {
                                 "Consent not found with id: " + id));
     }
 }
+
