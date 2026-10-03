@@ -3,8 +3,11 @@ package com.example.openbank.service;
 import com.example.openbank.dto.CreateCustomerRequest;
 import com.example.openbank.dto.UpdateCustomerRequest;
 import com.example.openbank.entity.Customer;
+import com.example.openbank.exception.BusinessException;
 import com.example.openbank.exception.CustomerNotFoundException;
 import com.example.openbank.repository.CustomerRepository;
+
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,22 +21,106 @@ public class CustomerService {
         this.customerRepository = customerRepository;
     }
 
-  public Customer createCustomer(CreateCustomerRequest request) {
+    // CREATE CUSTOMER
+    public Customer createCustomer(CreateCustomerRequest request) {
 
-    Customer customer = new Customer();
+        Customer customer = new Customer();
 
-    customer.setName(request.getName());
-    customer.setEmail(request.getEmail());
-    customer.setPhone(request.getPhone());
+        customer.setName(request.getName());
+        customer.setEmail(request.getEmail());
+        customer.setPhone(request.getPhone());
 
-    return customerRepository.save(customer);
-}
+        return customerRepository.save(customer);
+    }
 
+    // GET ALL CUSTOMERS
     public List<Customer> getAllCustomers() {
         return customerRepository.findAll();
     }
 
-     public Customer getCustomerById(Long id) {
+    // GET CUSTOMER BY ID
+    public Customer getCustomerById(
+            Long id,
+            Authentication authentication) {
+
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() ->
+                        new CustomerNotFoundException(
+                                "Customer not found with ID: " + id
+                        )
+                );
+
+        boolean isCustomer = authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        authority.getAuthority()
+                                .equals("ROLE_CUSTOMER")
+                );
+
+        if (isCustomer) {
+
+            String username = authentication.getName();
+
+            if (!username.equals(customer.getUsername())) {
+
+                throw new BusinessException(
+                        "You are not allowed to access this customer"
+                );
+            }
+        }
+
+        return customer;
+    }
+
+    // UPDATE CUSTOMER
+    public Customer updateCustomer(
+            Long id,
+            UpdateCustomerRequest request,
+            Authentication authentication) {
+
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() ->
+                        new CustomerNotFoundException(
+                                "Customer not found with id: " + id
+                        )
+                );
+
+        boolean isCustomer = authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        authority.getAuthority()
+                                .equals("ROLE_CUSTOMER")
+                );
+
+        if (isCustomer) {
+
+            String username = authentication.getName();
+
+            if (!username.equals(customer.getUsername())) {
+
+                throw new BusinessException(
+                        "You are not allowed to update this customer"
+                );
+            }
+        }
+
+        customer.setName(request.getName());
+        customer.setEmail(request.getEmail());
+        customer.setPhone(request.getPhone());
+
+        return customerRepository.save(customer);
+    }
+
+    // DELETE CUSTOMER
+    public void deleteCustomer(Long id) {
+
+        Customer customer = getCustomerByIdWithoutAuthentication(id);
+
+        customerRepository.delete(customer);
+    }
+
+    // INTERNAL METHOD
+    private Customer getCustomerByIdWithoutAuthentication(Long id) {
 
         return customerRepository.findById(id)
                 .orElseThrow(() ->
@@ -41,28 +128,5 @@ public class CustomerService {
                                 "Customer not found with ID: " + id
                         )
                 );
-    }
-
-   public Customer updateCustomer(
-        Long id,
-        UpdateCustomerRequest request) {
-
-    Customer customer = customerRepository.findById(id)
-            .orElseThrow(() ->
-                    new CustomerNotFoundException(
-                            "Customer not found with id: " + id));
-
-    customer.setName(request.getName());
-    customer.setEmail(request.getEmail());
-    customer.setPhone(request.getPhone());
-
-    return customerRepository.save(customer);
-}
-
-    public void deleteCustomer(Long id) {
-
-        Customer customer = getCustomerById(id);
-
-        customerRepository.delete(customer);
     }
 }
