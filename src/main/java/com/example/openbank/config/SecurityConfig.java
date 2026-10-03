@@ -21,6 +21,7 @@ public class SecurityConfig {
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(
                 new KeycloakRoleConverter()
         );
+        jwtAuthenticationConverter.setPrincipalClaimName("preferred_username");
 
         http
             .csrf(csrf -> csrf.disable())

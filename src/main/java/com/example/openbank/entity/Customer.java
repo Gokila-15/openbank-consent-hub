@@ -22,7 +22,10 @@ public class Customer {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
-    
+    // Keycloak username
+     @Column(unique = true) 
+     private String username;
+
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
@@ -58,6 +61,13 @@ public class Customer {
     public void setPhone(String phone) {
         this.phone = phone;
     }
+    public String getUsername() { 
+        return username;
+     } 
+    public void setUsername(String username)
+     { this.username = username;
+        
+      }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
