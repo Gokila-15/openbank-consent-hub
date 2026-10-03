@@ -25,17 +25,29 @@ public class Consent {
     @Column(nullable = false)
     private String status;
 
-   @Column(name = "created_by", nullable = false)
-   private String createdBy;
+  @Column(name = "created_by", nullable = false)
+private String createdBy;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+@Column(name = "created_at", nullable = false)
+private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+@Column(name = "updated_at")
+private LocalDateTime updatedAt;
 
-    @Column(name = "expires_at")
-    private LocalDateTime expiresAt;
+@Column(name = "approved_by")
+private String approvedBy;
+
+@Column(name = "approved_at")
+private LocalDateTime approvedAt;
+
+@Column(name = "rejected_by")
+private String rejectedBy;
+
+@Column(name = "rejected_at")
+private LocalDateTime rejectedAt;
+
+@Column(name = "expires_at")
+private LocalDateTime expiresAt;
 
     public Consent() {
     }
@@ -114,5 +126,36 @@ public class Consent {
 
 public void setCreatedBy(String createdBy) {
     this.createdBy = createdBy;
+}
+public String getApprovedBy() {
+    return approvedBy;
+}
+
+public void setApprovedBy(String approvedBy) {
+    this.approvedBy = approvedBy;
+}
+
+public LocalDateTime getApprovedAt() {
+    return approvedAt;
+}
+
+public void setApprovedAt(LocalDateTime approvedAt) {
+    this.approvedAt = approvedAt;
+}
+
+public String getRejectedBy() {
+    return rejectedBy;
+}
+
+public void setRejectedBy(String rejectedBy) {
+    this.rejectedBy = rejectedBy;
+}
+
+public LocalDateTime getRejectedAt() {
+    return rejectedAt;
+}
+
+public void setRejectedAt(LocalDateTime rejectedAt) {
+    this.rejectedAt = rejectedAt;
 }
 }

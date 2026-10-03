@@ -13,6 +13,7 @@ import com.example.openbank.repository.CustomerRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -188,69 +189,55 @@ public Consent createConsent(
     }
 
     // APPROVE / REJECT CONSENT
-    public Consent updateConsent(
-            Long id,
-            UpdateConsentRequest request,
-            Authentication authentication) {
+   public Consent updateConsent(
+        Long id,
+        UpdateConsentRequest request,
+        Authentication authentication) {
 
-        /*
-         * Find the consent.
-         */
-        Consent consent =
-                getConsentByIdWithoutAuthentication(id);
+    Consent consent =
+            getConsentByIdWithoutAuthentication(id);
 
-        /*
-         * Only PENDING consents can be
-         * approved or rejected.
-         */
-        if (!"PENDING".equals(consent.getStatus())) {
-
-            throw new BusinessException(
-                    "Only PENDING consent can be approved or rejected");
-        }
-
-        /*
-         * Get the currently logged-in user.
-         */
-        String username = authentication.getName();
-
-        /*
-         * SELF-APPROVAL PREVENTION
-         *
-         * Compare:
-         *
-         * consent.createdBy
-         *        vs
-         * currently logged-in username
-         *
-         * If they are the same user,
-         * block the operation.
-         */
-        if (consent.getCreatedBy().equals(username)) {
-
-            throw new BusinessException(
-                    "You cannot approve or reject your own consent");
-        }
-
-        /*
-         * Only APPROVED or REJECTED
-         * are valid final statuses.
-         */
-        if (!"APPROVED".equals(request.getStatus())
-                && !"REJECTED".equals(request.getStatus())) {
-
-            throw new BusinessException(
-                    "Consent status must be APPROVED or REJECTED");
-        }
-
-        /*
-         * Update the consent status.
-         */
-        consent.setStatus(request.getStatus());
-
-        return consentRepository.save(consent);
+    // Only PENDING consent can be processed
+    if (!"PENDING".equals(consent.getStatus())) {
+        throw new BusinessException(
+                "Only PENDING consent can be approved or rejected");
     }
 
+    String username = authentication.getName();
+
+    // Prevent creator from approving/rejecting own consent
+    if (consent.getCreatedBy().equals(username)) {
+        throw new BusinessException(
+                "You cannot approve or reject your own consent");
+    }
+
+    // Validate status
+    if (!"APPROVED".equals(request.getStatus())
+            && !"REJECTED".equals(request.getStatus())) {
+
+        throw new BusinessException(
+                "Consent status must be APPROVED or REJECTED");
+    }
+
+    // APPROVE
+    if ("APPROVED".equals(request.getStatus())) {
+
+        consent.setStatus("APPROVED");
+        consent.setApprovedBy(username);
+        consent.setApprovedAt(LocalDateTime.now());
+
+    }
+
+    // REJECT
+    else {
+
+        consent.setStatus("REJECTED");
+        consent.setRejectedBy(username);
+        consent.setRejectedAt(LocalDateTime.now());
+    }
+
+    return consentRepository.save(consent);
+}
     // INTERNAL METHOD
     // Used by CHECKER / ADMIN while processing consent
     private Consent getConsentByIdWithoutAuthentication(
