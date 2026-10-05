@@ -1,0 +1,71 @@
+services:
+
+  openbank-db:
+    image: postgres:16
+    container_name: openbank-db
+    environment:
+      POSTGRES_DB: openbank
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Gokila@2005
+    ports:
+      - "5433:5432"
+    volumes:
+      - openbank-db-data:/var/lib/postgresql/data
+    networks:
+      - openbank-network
+    restart: unless-stopped
+
+  openbank-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: openbank-api
+    container_name: openbank-api
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://openbank-db:5432/openbank
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Gokila@2005
+
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080/realms/openbank
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/openbank/protocol/openid-connect/certs
+    ports:
+      - "8081:8081"
+    depends_on:
+      - openbank-db
+    networks:
+      - openbank-network
+    restart: unless-stopped
+
+  openbank-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: openbank-frontend
+    container_name: openbank-frontend
+    ports:
+      - "5173:80"
+    networks:
+      - openbank-network
+    restart: unless-stopped
+
+  openbank-nginx:
+    image: nginx:alpine
+    container_name: openbank-nginx
+    ports:
+      - "8090:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - openbank-frontend
+      - openbank-api
+    networks:
+      - openbank-network
+    restart: unless-stopped
+
+volumes:
+  openbank-db-data:
+    external: true
+
+networks:
+  openbank-network:
+    external: true

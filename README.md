@@ -1,1001 +1,736 @@
-# OpenBank Consent Hub
+# OpenBank Consent Management System
 
-A secure Open Banking Consent Management System built using Spring Boot, PostgreSQL, JPA/Hibernate, Bean Validation, and REST APIs.
+A secure **Open Banking Consent Management System** built using Spring Boot, React, PostgreSQL, Keycloak, Docker, and Nginx.
 
-The project is being developed as part of a Full-Stack Developer Training and Selection Program.
-
----
-
-## Project Overview
-
-OpenBank Consent Hub is a backend-focused Open Banking application that manages customers, bank accounts, transactions, beneficiaries, and customer consent requests.
-
-The system is designed around a banking domain and will later be extended with:
-
-* Keycloak authentication
-* JWT-based API security
-* Role-Based Access Control (RBAC)
-* Maker/Checker workflow
-* React frontend
-* Nginx API gateway
-* Docker Compose
-
-### Current Status
-
-The following backend modules have been completed:
-
-* Customer Management
-* Account Management
-* Transaction Management
-* Beneficiary Management
-* Consent Management
-* Bean Validation
-* Custom Exception Handling
-* Global Exception Handling
+The system manages customers, bank accounts, transactions, beneficiaries, and consent requests while implementing **OAuth 2.0 / OpenID Connect authentication**, **JWT-based authorization**, and **role-based access control** using Keycloak.
 
 ---
 
-# Technology Stack
+## 📌 Project Overview
 
-| Technology              | Purpose                        |
-| ----------------------- | ------------------------------ |
-| Java 21                 | Backend programming language   |
-| Spring Boot             | Backend framework              |
-| Spring Web              | REST API development           |
-| Spring Data JPA         | Database access                |
-| Hibernate               | ORM                            |
-| PostgreSQL              | Relational database            |
-| Jakarta Bean Validation | Request validation             |
-| Spring Security         | Initial security configuration |
-| Maven                   | Dependency management          |
-| Postman                 | API testing                    |
-| Git/GitHub              | Version control                |
+The OpenBank Consent Management System is designed to demonstrate how an Open Banking platform can securely manage customer data access through a **consent-based workflow**.
 
----
+A customer can create a consent request specifying:
 
-# Project Architecture
+- Purpose of data access
+- Type of data that can be accessed
+- Consent status
+- Expiration date
+
+The consent then follows a **Maker–Checker workflow**, where authorized users can review and approve or reject requests.
+
+### Main Workflow
 
 ```text
-                    Client
-                      |
-                      | HTTP Request
-                      ↓
-                REST Controller
-                      |
-                      ↓
-                     DTO
-                      |
-                 @Valid
-                      |
-                      ↓
-                  Service
-                      |
-                      ↓
-                 Repository
-                      |
-                      ↓
-                 JPA/Hibernate
-                      |
-                      ↓
-                  PostgreSQL
-```
-
-Exception handling:
-
-```text
-Controller
-    |
-    | Exception
-    ↓
-GlobalExceptionHandler
-    |
-    ↓
-HTTP Error Response
+Customer
+   │
+   │ Create Consent
+   ▼
+Pending Consent
+   │
+   ├───────────────┐
+   │               │
+   ▼               ▼
+Checker          Admin
+   │               │
+   └───────┬───────┘
+           │
+     Approve / Reject
+           │
+           ▼
+     Final Consent Status
 ```
 
 ---
 
-# Project Structure
+# 🏗️ System Architecture
 
 ```text
-openbank/
-│
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── com/
-│   │   │       └── example/
-│   │   │           └── openbank/
-│   │   │               │
-│   │   │               ├── controller/
-│   │   │               │   ├── HealthController.java
-│   │   │               │   ├── InfoController.java
-│   │   │               │   ├── CustomerController.java
-│   │   │               │   ├── AccountController.java
-│   │   │               │   ├── TransactionController.java
-│   │   │               │   ├── BeneficiaryController.java
-│   │   │               │   └── ConsentController.java
-│   │   │               │
-│   │   │               ├── dto/
-│   │   │               │   ├── CreateCustomerRequest.java
-│   │   │               │   ├── UpdateCustomerRequest.java
-│   │   │               │   ├── CreateAccountRequest.java
-│   │   │               │   ├── UpdateAccountRequest.java
-│   │   │               │   ├── CreateTransactionRequest.java
-│   │   │               │   ├── CreateBeneficiaryRequest.java
-│   │   │               │   ├── UpdateBeneficiaryRequest.java
-│   │   │               │   ├── CreateConsentRequest.java
-│   │   │               │   └── UpdateConsentRequest.java
-│   │   │               │
-│   │   │               ├── entity/
-│   │   │               │   ├── Customer.java
-│   │   │               │   ├── Account.java
-│   │   │               │   ├── Transaction.java
-│   │   │               │   ├── Beneficiary.java
-│   │   │               │   └── Consent.java
-│   │   │               │
-│   │   │               ├── repository/
-│   │   │               │   ├── CustomerRepository.java
-│   │   │               │   ├── AccountRepository.java
-│   │   │               │   ├── TransactionRepository.java
-│   │   │               │   ├── BeneficiaryRepository.java
-│   │   │               │   └── ConsentRepository.java
-│   │   │               │
-│   │   │               ├── service/
-│   │   │               │   ├── CustomerService.java
-│   │   │               │   ├── AccountService.java
-│   │   │               │   ├── TransactionService.java
-│   │   │               │   ├── BeneficiaryService.java
-│   │   │               │   └── ConsentService.java
-│   │   │               │
-│   │   │               ├── exception/
-│   │   │               │   ├── CustomerNotFoundException.java
-│   │   │               │   ├── AccountNotFoundException.java
-│   │   │               │   ├── TransactionNotFoundException.java
-│   │   │               │   ├── BeneficiaryNotFoundException.java
-│   │   │               │   ├── ConsentNotFoundException.java
-│   │   │               │   ├── BusinessException.java
-│   │   │               │   └── GlobalExceptionHandler.java
-│   │   │               │
-│   │   │               └── config/
-│   │   │                   └── SecurityConfig.java
-│   │   │
-│   │   └── resources/
-│   │       └── application.properties
-│   │
-│   ├── test/
-│   │
-│   └── ...
-│
-├── pom.xml
-├── .gitignore
-└── README.md
+                    ┌──────────────────┐
+                    │     Browser      │
+                    └────────┬─────────┘
+                             │
+                             ▼
+                    ┌──────────────────┐
+                    │      React       │
+                    │    Frontend      │
+                    └────────┬─────────┘
+                             │
+                             ▼
+                    ┌──────────────────┐
+                    │      Nginx       │
+                    │  Reverse Proxy   │
+                    └────────┬─────────┘
+                             │
+                             ▼
+                    ┌──────────────────┐
+                    │   Spring Boot    │
+                    │      REST API    │
+                    └────────┬─────────┘
+                             │
+                  ┌──────────┴──────────┐
+                  ▼                     ▼
+        ┌──────────────────┐   ┌──────────────────┐
+        │    PostgreSQL    │   │     Keycloak     │
+        │     Database     │   │ Authentication   │
+        └──────────────────┘   └──────────────────┘
 ```
 
 ---
 
-# Database
+# 🛠️ Technology Stack
 
-The application uses PostgreSQL.
+## Frontend
 
-### Database
+- React
+- TypeScript
+- Vite
+- Axios
+- HTML
+- CSS
+
+## Backend
+
+- Java 21
+- Spring Boot
+- Spring Security
+- Spring Data JPA
+- Hibernate
+- REST APIs
+- Maven
+
+## Database
+
+- PostgreSQL 16
+
+## Authentication & Authorization
+
+- Keycloak
+- OAuth 2.0
+- OpenID Connect
+- JWT
+- Role-Based Access Control (RBAC)
+
+## Infrastructure
+
+- Docker
+- Docker Compose
+- Nginx
+
+## API Testing
+
+- Postman
+
+---
+
+# 👥 User Roles
+
+The system contains four roles.
+
+| Role | Responsibility |
+|---|---|
+| CUSTOMER | Manage own banking information and create consent requests |
+| MAKER | Perform operational activities and create banking/consent records |
+| CHECKER | Review and approve/reject consent requests |
+| ADMIN | Administrative access and consent approval/rejection |
+
+### Role Structure
+
+```text
+                    OpenBank System
+                         │
+          ┌──────────────┼──────────────┐
+          │              │              │
+      CUSTOMER         MAKER          CHECKER
+          │              │              │
+          │              │              │
+          └──────────────┴──────┬───────┘
+                                │
+                              ADMIN
+```
+
+There can be:
+
+- 1 ADMIN
+- 1 MAKER
+- 1 CHECKER
+- Multiple CUSTOMERS
+
+---
+
+# 🔐 Authentication Flow
+
+Authentication is handled by Keycloak.
+
+```text
+User
+ │
+ ▼
+React Application
+ │
+ ▼
+Keycloak Login
+ │
+ ▼
+Username + Password
+ │
+ ▼
+Keycloak
+ │
+ ▼
+JWT Access Token
+ │
+ ▼
+React
+ │
+ ▼
+Axios Authorization Header
+ │
+ │ Bearer <JWT>
+ ▼
+Spring Boot
+ │
+ ▼
+JWT Validation
+ │
+ ▼
+Role Extraction
+ │
+ ▼
+Role-Based Authorization
+```
+
+The backend extracts roles from the JWT and converts them into Spring Security authorities.
+
+Example:
+
+```text
+CUSTOMER → ROLE_CUSTOMER
+MAKER    → ROLE_MAKER
+CHECKER  → ROLE_CHECKER
+ADMIN    → ROLE_ADMIN
+```
+
+---
+
+# 🔑 Keycloak Configuration
+
+Keycloak runs on:
+
+```text
+http://localhost:8080
+```
+
+Realm:
 
 ```text
 openbank
 ```
 
-### Configuration
+Frontend client:
 
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/openbank
-spring.datasource.username=postgres
-spring.datasource.password=YOUR_PASSWORD
-
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
+```text
+openbank-frontend
 ```
 
-> Do not commit the real database password to GitHub.
+The frontend uses the Keycloak JavaScript client to authenticate users.
+
+The backend acts as an OAuth 2.0 Resource Server and validates JWT access tokens issued by Keycloak.
 
 ---
 
-# Domain Model
+# 📦 Backend Modules
 
-The current database relationships are:
+The Spring Boot backend contains the following major modules:
 
 ```text
 Customer
-   |
-   | 1:N
-   ↓
-Account
-   |
-   | 1:N
-   ↓
-Transaction
-
-
-Customer
-   |
-   | 1:N
-   ↓
-Beneficiary
-
-
-Customer
-   |
-   | 1:N
-   ↓
-Consent
+   │
+   ├── Account
+   │
+   ├── Transaction
+   │
+   ├── Beneficiary
+   │
+   └── Consent
 ```
+
+### Customer
+
+Manages customer information such as:
+
+- Name
+- Email
+- Phone number
+
+### Account
+
+Manages customer bank accounts.
+
+### Transaction
+
+Manages banking transactions and validates transaction amounts.
+
+### Beneficiary
+
+Manages beneficiaries associated with banking accounts.
+
+### Consent
+
+Manages:
+
+- Consent creation
+- Consent status
+- Purpose
+- Data access
+- Approval
+- Rejection
+- Expiration
+- Audit information
 
 ---
 
-# 1. Customer Management
+# 🔄 Consent Management Workflow
 
-Customer represents a bank customer.
-
-### Customer fields
+A consent can move through different states.
 
 ```text
-id
-name
-email
-phone
-created_at
+        ┌─────────────┐
+        │   PENDING   │
+        └──────┬──────┘
+               │
+        ┌──────┴───────┐
+        │              │
+        ▼              ▼
+   ┌─────────┐    ┌─────────┐
+   │ APPROVED│    │ REJECTED│
+   └─────────┘    └─────────┘
 ```
 
-### APIs
+The system also stores audit information such as:
 
-| Method | Endpoint              | Description                                       |
-| ------ | --------------------- | ------------------------------------------------- |
-| POST   | `/api/customers`      | Create customer                                   |
-| GET    | `/api/customers`      | Get all customers                                 |
-| GET    | `/api/customers/{id}` | Get customer                                      |
-| PUT    | `/api/customers/{id}` | Update customer                                   |
-| DELETE | `/api/customers/{id}` | Delete/close customer according to implementation |
+- Created By
+- Created At
+- Approved By
+- Approved At
+- Rejected By
+- Rejected At
+- Updated At
+- Expiry Date
 
-### Validation
+### Maker–Checker Security
 
-Customer request validation includes:
+The user who creates a consent cannot approve or reject the same consent.
 
-```text
-Name
-    ↓
-@NotBlank
-
-Email
-    ↓
-@NotBlank
-@Email
-
-Phone
-    ↓
-@NotBlank
-@Pattern
-```
-
-Example:
-
-```json
-{
-    "name": "Madhan",
-    "email": "madhan@gmail.com",
-    "phone": "9876543210"
-}
-```
+This prevents self-approval and provides separation of duties.
 
 ---
 
-# 2. Account Management
+# 🔒 Security Features
 
-Account represents a customer's bank account.
+The project implements:
 
-### Account fields
-
-```text
-id
-account_number
-account_type
-balance
-status
-customer_id
-created_at
-```
-
-### APIs
-
-| Method | Endpoint                              | Description             |
-| ------ | ------------------------------------- | ----------------------- |
-| POST   | `/api/accounts`                       | Create account          |
-| GET    | `/api/accounts`                       | Get all accounts        |
-| GET    | `/api/accounts/{id}`                  | Get account             |
-| GET    | `/api/accounts/customer/{customerId}` | Get customer's accounts |
-| PUT    | `/api/accounts/{id}`                  | Update account          |
-| DELETE | `/api/accounts/{id}`                  | Close account           |
-
-### Important business rule
-
-Account balance is not directly changed through account update APIs.
-
-Balance changes through transactions.
-
-Account deletion is implemented as a logical close:
-
-```text
-ACTIVE → CLOSED
-```
-
-This preserves banking history.
-
-### Validation
-
-```text
-accountNumber → @NotBlank
-accountType   → @NotBlank
-customerId    → @NotNull
-```
+- OAuth 2.0 authentication
+- OpenID Connect
+- JWT authentication
+- Role-Based Access Control
+- Customer ownership validation
+- Maker–Checker workflow
+- Self-approval prevention
+- Input validation
+- Custom exceptions
+- Global exception handling
+- CORS configuration
+- Secure API endpoints
 
 ---
 
-# 3. Transaction Management
+# 🗄️ Database
 
-Transactions record deposits and withdrawals.
+PostgreSQL is used as the primary application database.
 
-### Transaction fields
-
-```text
-id
-account_id
-type
-amount
-balance_after
-description
-transaction_date
-```
-
-### APIs
-
-| Method | Endpoint                                | Description              |
-| ------ | --------------------------------------- | ------------------------ |
-| POST   | `/api/transactions`                     | Create transaction       |
-| GET    | `/api/transactions`                     | Get all transactions     |
-| GET    | `/api/transactions/{id}`                | Get transaction          |
-| GET    | `/api/transactions/account/{accountId}` | Get account transactions |
-
-### Supported transaction types
+Database:
 
 ```text
-DEPOSIT
-WITHDRAWAL
+openbank
 ```
 
-### Transaction validation
+Container:
 
 ```text
-accountId
-    ↓
-@NotNull
-
-type
-    ↓
-@NotBlank
-
-amount
-    ↓
-@NotNull
-@DecimalMin("0.01")
+openbank-db
 ```
 
-### Business rules
+Host port:
 
-* Closed accounts cannot perform transactions.
-* Amount must be greater than zero.
-* Withdrawal cannot exceed account balance.
-* Transaction type must be `DEPOSIT` or `WITHDRAWAL`.
-
-### Transaction safety
-
-The transaction creation operation uses:
-
-```java
-@Transactional
+```text
+5433
 ```
 
-This ensures the account balance update and transaction insertion are treated as one database transaction.
+Container port:
+
+```text
+5432
+```
+
+Persistent Docker volume:
+
+```text
+openbank-db-data
+```
+
+The database uses a persistent Docker volume so that restarting or recreating the application containers does not remove the database data.
 
 ---
 
-# 4. Beneficiary Management
+# 🐳 Docker Architecture
 
-A beneficiary represents an external bank account registered by a customer.
-
-### Beneficiary fields
+The OpenBank application is containerized using Docker Compose.
 
 ```text
-id
-name
-account_number
-bank_name
-ifsc_code
-customer_id
-created_at
-status
+                Docker Compose
+                     │
+       ┌─────────────┼─────────────┐
+       │             │             │
+       ▼             ▼             ▼
+ openbank-db   openbank-api   openbank-frontend
+       │             │             │
+       └─────────────┼─────────────┘
+                     │
+                     ▼
+               openbank-nginx
 ```
 
-### APIs
+### Containers
 
-| Method | Endpoint                                   | Description                  |
-| ------ | ------------------------------------------ | ---------------------------- |
-| POST   | `/api/beneficiaries`                       | Create beneficiary           |
-| GET    | `/api/beneficiaries`                       | Get all beneficiaries        |
-| GET    | `/api/beneficiaries/{id}`                  | Get beneficiary              |
-| GET    | `/api/beneficiaries/customer/{customerId}` | Get customer's beneficiaries |
-| PUT    | `/api/beneficiaries/{id}`                  | Update beneficiary           |
-| PATCH  | `/api/beneficiaries/{id}`                  | Partially update beneficiary |
-| DELETE | `/api/beneficiaries/{id}`                  | Deactivate beneficiary       |
-
-### Validation
-
-```text
-customerId
-    ↓
-@NotNull
-
-name
-    ↓
-@NotBlank
-@Size
-
-accountNumber
-    ↓
-@NotBlank
-@Pattern
-
-bankName
-    ↓
-@NotBlank
-
-ifscCode
-    ↓
-@NotBlank
-@Pattern
-```
-
-### Beneficiary status
-
-```text
-ACTIVE
-   ↓
-INACTIVE
-```
-
-Deletion is implemented as a logical deactivation to preserve the beneficiary record.
+| Container | Purpose | Port |
+|---|---|---|
+| openbank-db | PostgreSQL database | 5433 |
+| openbank-api | Spring Boot backend | 8081 |
+| openbank-frontend | React frontend | 5173 |
+| openbank-nginx | Reverse proxy/gateway | 8090 |
+| keycloak | Authentication server | 8080 |
+| keycloak-db | Keycloak database | Internal |
 
 ---
 
-# 5. Consent Management
+# 🌐 Application URLs
 
-Consent Management is the core Open Banking feature of the application.
-
-A consent represents permission for access to specified customer data.
-
-### Consent fields
+### Main Application
 
 ```text
-id
-customer_id
-purpose
-data_access
-status
-created_at
-updated_at
-expires_at
+http://localhost:8090
 ```
 
-### Consent status
+### React Frontend
 
 ```text
-PENDING
-APPROVED
-REJECTED
-EXPIRED
+http://localhost:5173
 ```
 
-Current implemented lifecycle:
-
-```text
-              ┌───────────┐
-              │  PENDING  │
-              └─────┬─────┘
-                    / \
-                   /   \
-                  ↓     ↓
-             APPROVED  REJECTED
-```
-
-### APIs
-
-| Method | Endpoint                              | Description            |
-| ------ | ------------------------------------- | ---------------------- |
-| POST   | `/api/consents`                       | Create consent         |
-| GET    | `/api/consents`                       | Get all consents       |
-| GET    | `/api/consents/{id}`                  | Get consent            |
-| GET    | `/api/consents/customer/{customerId}` | Get customer consents  |
-| PUT    | `/api/consents/{id}`                  | Approve/reject consent |
-
-### Create Consent
-
-```http
-POST /api/consents
-```
-
-```json
-{
-    "customerId": 1,
-    "purpose": "Account Information Access",
-    "dataAccess": "ACCOUNT",
-    "expiresAt": "2026-12-31T23:59:59"
-}
-```
-
-A newly created consent automatically receives:
-
-```text
-status = PENDING
-```
-
-### Approve Consent
-
-```http
-PUT /api/consents/1
-```
-
-```json
-{
-    "status": "APPROVED"
-}
-```
-
-### Reject Consent
-
-```http
-PUT /api/consents/2
-```
-
-```json
-{
-    "status": "REJECTED"
-}
-```
-
-### Consent validation
-
-```text
-customerId
-    ↓
-@NotNull
-
-purpose
-    ↓
-@NotBlank
-
-dataAccess
-    ↓
-@NotBlank
-
-expiresAt
-    ↓
-@Future
-```
-
-Update validation:
-
-```text
-status
-    ↓
-@NotBlank
-@Pattern
-    ↓
-APPROVED or REJECTED
-```
-
-### Consent business rule
-
-Only a `PENDING` consent can be approved or rejected.
-
-```text
-PENDING → APPROVED    ✅
-PENDING → REJECTED    ✅
-
-APPROVED → REJECTED   ❌
-REJECTED → APPROVED   ❌
-```
-
----
-
-# Validation Architecture
-
-Bean Validation is used at the DTO layer.
-
-Example:
-
-```java
-@Valid
-@RequestBody CreateCustomerRequest request
-```
-
-Validation annotations include:
-
-```text
-@NotBlank
-@NotNull
-@Email
-@Pattern
-@Size
-@DecimalMin
-@Future
-```
-
-### Validation flow
-
-```text
-Postman
-   ↓
-HTTP Request
-   ↓
-Controller
-   ↓
-@RequestBody
-   ↓
-DTO
-   ↓
-@Valid
-   ↓
-Bean Validation
-   ↓
-Valid?
- ┌─┴───────────┐
- │             │
-YES            NO
- │             │
- ↓             ↓
-Service    MethodArgumentNotValidException
- │             │
- ↓             ↓
-Database   GlobalExceptionHandler
-             │
-             ↓
-          HTTP 400
-```
-
----
-
-# Exception Handling
-
-The application uses custom exceptions instead of generic exceptions for important cases.
-
-Current custom exceptions:
-
-```text
-CustomerNotFoundException
-AccountNotFoundException
-TransactionNotFoundException
-BeneficiaryNotFoundException
-ConsentNotFoundException
-BusinessException
-```
-
-All are handled centrally using:
-
-```java
-@RestControllerAdvice
-public class GlobalExceptionHandler
-```
-
-### Example error response
-
-```json
-{
-    "status": 404,
-    "message": "Customer not found with id: 10",
-    "timestamp": "2026-09-30T10:30:00"
-}
-```
-
-### Validation error response
-
-```json
-{
-    "status": 400,
-    "message": "Validation failed",
-    "errors": {
-        "email": "Email must be valid",
-        "phone": "Phone number must contain exactly 10 digits"
-    },
-    "timestamp": "2026-09-30T10:30:00"
-}
-```
-
----
-
-# API Testing
-
-Postman is currently used for API testing.
-
-Testing includes:
-
-* Valid requests
-* Missing required fields
-* Invalid email
-* Invalid phone number
-* Invalid account number
-* Invalid IFSC code
-* Invalid transaction amount
-* Invalid transaction type
-* Non-existent customer
-* Non-existent account
-* Non-existent transaction
-* Non-existent beneficiary
-* Non-existent consent
-* Invalid consent status
-* Invalid consent lifecycle transitions
-* Insufficient account balance
-* Closed account transaction attempts
-
----
-
-# Initial Security Configuration
-
-Spring Security has been added to the project.
-
-Currently:
-
-```text
-/health
-/api/info
-```
-
-are publicly accessible.
-
-Other APIs require authentication under the current security configuration.
-
-Full authentication and authorization using Keycloak will be implemented in a later phase.
-
----
-
-# Health Check
-
-### API
-
-```http
-GET /health
-```
-
-Response:
-
-```json
-{
-    "status": "UP"
-}
-```
-
----
-
-# Application Information
-
-### API
-
-```http
-GET /api/info
-```
-
-Response:
-
-```json
-{
-    "application": "OpenBank Consent Hub",
-    "version": "1.0.0",
-    "status": "Development"
-}
-```
-
----
-
-# How to Run
-
-## 1. Start PostgreSQL
-
-Make sure PostgreSQL is running.
-
-Create the database:
-
-```sql
-CREATE DATABASE openbank;
-```
-
----
-
-## 2. Configure `application.properties`
-
-```properties
-spring.application.name=openbank
-
-spring.datasource.url=jdbc:postgresql://localhost:5432/openbank
-spring.datasource.username=postgres
-spring.datasource.password=YOUR_PASSWORD
-
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
-```
-
----
-
-## 3. Run the application
-
-Using Maven:
-
-```bash
-mvn spring-boot:run
-```
-
-The application runs on:
+### Spring Boot API
 
 ```text
 http://localhost:8081
 ```
 
----
-
-# Future Development
-
-The following features are planned for the next phases.
-
-## Phase 1 — Backend Completion
-
-* [x] Customer Management
-* [x] Account Management
-* [x] Transaction Management
-* [x] Beneficiary Management
-* [x] Consent Management
-* [x] DTOs
-* [x] Bean Validation
-* [x] Custom Exceptions
-* [x] Global Exception Handling
-
-## Phase 2 — Authentication and Authorization
-
-* [ ] Keycloak setup
-* [ ] JWT authentication
-* [ ] OAuth2/OIDC
-* [ ] Role-Based Access Control
-* [ ] CUSTOMER role
-* [ ] MAKER role
-* [ ] CHECKER role
-* [ ] ADMIN role
-* [ ] Secure API endpoints
-
-## Phase 3 — Maker/Checker Workflow
+### Keycloak
 
 ```text
-MAKER
-  ↓
-Create Consent
-  ↓
-PENDING
-  ↓
-CHECKER
-  ↓
-APPROVE / REJECT
-```
-
-## Phase 4 — React Frontend
-
-Planned frontend features:
-
-* Login
-* Customer dashboard
-* Account dashboard
-* Transaction history
-* Beneficiary management
-* Consent management
-* Maker dashboard
-* Checker dashboard
-* Admin dashboard
-
-## Phase 5 — Nginx
-
-Planned architecture:
-
-```text
-             Client
-                |
-                ↓
-              Nginx
-           /    |    \
-          /     |     \
-       React  Backend  Keycloak
-                 |
-                 ↓
-             PostgreSQL
-```
-
-## Phase 6 — Docker
-
-Planned Docker Compose services:
-
-```text
-React
-Spring Boot
-PostgreSQL
-Keycloak
-Nginx
-```
-
-## Phase 7 — Final Testing and Documentation
-
-* [ ] Integration testing
-* [ ] Security testing
-* [ ] API documentation
-* [ ] Docker deployment
-* [ ] Final project demonstration
-* [ ] Project presentation
-
----
-
-# Development Progress
-
-```text
-Customer              ████████████████████ 100%
-Customer Validation   ████████████████████ 100%
-
-Account               ████████████████████ 100%
-Account Validation    ████████████████████ 100%
-
-Transaction           ████████████████████ 100%
-Transaction Validation████████████████████ 100%
-
-Beneficiary           ████████████████████ 100%
-Beneficiary Validation████████████████████ 100%
-
-Consent               ████████████████████ 100%
-Consent Validation    ████████████████████ 100%
-
-Keycloak              ░░░░░░░░░░░░░░░░░░░░   0%
-React Frontend        ░░░░░░░░░░░░░░░░░░░░   0%
-Nginx                 ░░░░░░░░░░░░░░░░░░░░   0%
-Docker Compose        ░░░░░░░░░░░░░░░░░░░░   0%
+http://localhost:8080
 ```
 
 ---
 
-# Project Goal
-
-The final goal is to build a secure Open Banking Consent Management platform with:
+# ⚙️ Project Structure
 
 ```text
-                    OpenBank Consent Hub
-
-                           Client
-                             |
-                             ↓
-                           Nginx
-                             |
-              ┌──────────────┼──────────────┐
-              ↓              ↓              ↓
-           React         Spring Boot     Keycloak
-                            |
-             ┌──────────────┼──────────────┐
-             ↓              ↓              ↓
-          Customer       Account        Consent
-             |              |
-             ↓              ↓
-        Beneficiary     Transaction
-                            |
-                            ↓
-                       PostgreSQL
+openbank/
+│
+├── src/
+│   └── main/
+│       └── java/
+│           └── com/example/openbank/
+│               │
+│               ├── config/
+│               ├── controller/
+│               ├── service/
+│               ├── repository/
+│               ├── entity/
+│               ├── dto/
+│               └── exception/
+│
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   ├── Dockerfile
+│   └── package.json
+│
+├── nginx/
+│   └── nginx.conf
+│
+├── target/
+│   └── openbank-0.0.1-SNAPSHOT.jar
+│
+├── Dockerfile
+├── docker-compose.yml
+├── .env
+├── .gitignore
+├── pom.xml
+└── README.md
 ```
 
-The completed system will combine banking operations, consent management, authentication, authorization, and a modern web frontend into a single Open Banking application.
+---
+
+# 🚀 Running the Project
+
+## Prerequisites
+
+Install:
+
+- Java 21
+- Maven
+- Node.js
+- Docker Desktop
+- PostgreSQL
+- Postman
+
+---
+
+## 1. Clone the Repository
+
+```bash
+git clone <your-repository-url>
+cd openbank
+```
+
+---
+
+## 2. Configure Environment Variables
+
+Create a `.env` file in the project root:
+
+```text
+OPENBANK_DB_PASSWORD=<your-postgresql-password>
+```
+
+Do **not** commit `.env` to Git.
+
+`.gitignore` should contain:
+
+```text
+.env
+```
+
+---
+
+## 3. Build the Backend
+
+```bash
+mvn package -DskipTests
+```
+
+---
+
+## 4. Start Docker Compose
+
+```bash
+docker compose up -d --build
+```
+
+---
+
+## 5. Check Containers
+
+```bash
+docker compose ps
+```
+
+Expected services:
+
+```text
+openbank-db
+openbank-api
+openbank-frontend
+openbank-nginx
+```
+
+---
+
+# 🛑 Stop the Application
+
+```bash
+docker compose down
+```
+
+This stops and removes the Compose containers.
+
+The PostgreSQL data remains stored in:
+
+```text
+openbank-db-data
+```
+
+Do not remove the volume unless you intentionally want to delete the database data.
+
+---
+
+# 🔄 Restart the Application
+
+```bash
+docker compose up -d
+```
+
+If backend or frontend code has changed and a new image is required:
+
+```bash
+docker compose up -d --build
+```
+
+---
+
+# 🧪 API Testing
+
+The APIs can be tested using Postman.
+
+Authentication is performed using Keycloak and the generated JWT access token is sent as:
+
+```http
+Authorization: Bearer <access-token>
+```
+
+Example:
+
+```http
+GET /api/customers/8
+Authorization: Bearer <JWT>
+```
+
+---
+
+# 🛡️ Error Handling
+
+The backend contains custom exceptions for resources such as:
+
+- Customer not found
+- Account not found
+- Beneficiary not found
+- Transaction-related validation errors
+- Consent-related errors
+
+A global exception handler provides consistent API error responses.
+
+---
+
+# 🧪 Validation
+
+The system performs validation for:
+
+- Customer details
+- Email addresses
+- Phone numbers
+- Account information
+- Transaction amounts
+- Beneficiary information
+- Consent information
+
+Invalid requests are rejected with appropriate error responses.
+
+---
+
+# 🔐 Security Architecture
+
+```text
+                    Keycloak
+                       │
+                       │ JWT
+                       ▼
+React ────────────► Spring Security
+                       │
+                       ▼
+               JWT Authentication
+                       │
+                       ▼
+                Role Extraction
+                       │
+          ┌────────────┼────────────┐
+          ▼            ▼            ▼
+      CUSTOMER       MAKER       CHECKER
+                                      │
+                                      ▼
+                                    ADMIN
+```
+
+---
+
+# 📈 Future Enhancements
+
+Possible future improvements include:
+
+- Open Banking API standardization
+- Consent notification system
+- Email notifications
+- Refresh-token handling improvements
+- Audit-log dashboard
+- API documentation using Swagger/OpenAPI
+- CI/CD pipeline
+- Cloud deployment
+- Kubernetes deployment
+- Monitoring and logging
+- Automated integration testing
+
+---
+
+# 👨‍💻 Project Purpose
+
+This project demonstrates practical implementation of:
+
+- Full-stack application development
+- REST API development
+- Secure authentication
+- OAuth 2.0 / OIDC
+- JWT-based authorization
+- Role-based access control
+- Maker–Checker workflow
+- PostgreSQL persistence
+- Docker containerization
+- Docker Compose orchestration
+- Nginx reverse proxy
+- React frontend integration
+
+---
+
+# 📌 Project Status
+
+**Status: Completed Core Implementation**
+
+Implemented:
+
+- Customer Management
+- Account Management
+- Transaction Management
+- Beneficiary Management
+- Consent Management
+- Customer / Maker / Checker / Admin roles
+- Keycloak authentication
+- JWT authorization
+- Role-based access control
+- Maker–Checker workflow
+- Self-approval prevention
+- Input validation
+- Global exception handling
+- React dashboards
+- Dockerized backend
+- Dockerized frontend
+- PostgreSQL persistence
+- Nginx gateway
+- Docker Compose deployment
+
+---
+
+## 👤 Author
+
+**Gokila S**
+
+B.Tech Information Technology  
+Government College of Technology, Coimbatore
