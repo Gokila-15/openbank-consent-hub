@@ -1,10 +1,20 @@
 export interface Customer {
   id: number;
   name: string;
+  lastName?: string;
   email: string;
   phone: string;
   username?: string;
   createdAt?: string;
+}
+
+export interface CreateCustomerRequest {
+  name: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  username: string;
+  password: string;
 }
 
 export interface UpdateCustomerRequest {
@@ -23,6 +33,17 @@ export interface Account {
   customer?: Customer;
 }
 
+export interface CreateAccountRequest {
+  customerId: number;
+  accountNumber: string;
+  accountType: string;
+}
+
+export interface UpdateAccountRequest {
+  accountType: string;
+  status: string;
+}
+
 export interface Transaction {
   id: number;
   type: 'DEPOSIT' | 'WITHDRAWAL' | string;
@@ -31,6 +52,13 @@ export interface Transaction {
   description: string;
   transactionDate: string;
   account?: Account;
+}
+
+export interface CreateTransactionRequest {
+  accountId: number;
+  type: 'DEPOSIT' | 'WITHDRAWAL' | string;
+  amount: number;
+  description?: string;
 }
 
 export interface Beneficiary {

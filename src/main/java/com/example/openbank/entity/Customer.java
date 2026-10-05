@@ -26,6 +26,8 @@ public class Customer {
      @Column(unique = true) 
      private String username;
 
+     @Column
+     private String password;
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
@@ -71,5 +73,11 @@ public class Customer {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+    public String getPassword() {
+        return password;
+    }
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

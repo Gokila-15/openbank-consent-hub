@@ -47,7 +47,8 @@ public Consent createConsent(
                             .equals("ROLE_CUSTOMER"))) {
 
         customer = customerRepository
-                .findByUsername(username)
+                .findByUsernameIgnoreCase(username)
+                .or(() -> customerRepository.findByEmailIgnoreCase(username))
                 .orElseThrow(() ->
                         new CustomerNotFoundException(
                                 "Customer not found for username: "
@@ -115,7 +116,8 @@ public Consent createConsent(
             String username = authentication.getName();
 
             Customer customer = customerRepository
-                    .findByUsername(username)
+                    .findByUsernameIgnoreCase(username)
+                    .or(() -> customerRepository.findByEmailIgnoreCase(username))
                     .orElseThrow(() ->
                             new CustomerNotFoundException(
                                     "Customer not found for username: "
@@ -157,7 +159,8 @@ public Consent createConsent(
              * Find the logged-in customer.
              */
             Customer loggedInCustomer = customerRepository
-                    .findByUsername(username)
+                    .findByUsernameIgnoreCase(username)
+                    .or(() -> customerRepository.findByEmailIgnoreCase(username))
                     .orElseThrow(() ->
                             new CustomerNotFoundException(
                                     "Customer not found for username: "

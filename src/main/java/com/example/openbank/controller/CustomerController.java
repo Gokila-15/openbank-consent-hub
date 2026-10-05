@@ -49,6 +49,31 @@ public class CustomerController {
         );
     }
 
+    // GET CURRENT LOGGED-IN CUSTOMER
+    @GetMapping("/me")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'MAKER', 'ADMIN')")
+    public ResponseEntity<Customer> getCurrentCustomer(
+            Authentication authentication) {
+
+        return ResponseEntity.ok(
+                customerService.getCustomerByUsername(
+                        authentication.getName()
+                )
+        );
+    }
+
+    // GET CUSTOMER BY USERNAME
+    @GetMapping("/username/{username}")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'MAKER', 'ADMIN')")
+    public ResponseEntity<Customer> getCustomerByUsername(
+            @PathVariable String username,
+            Authentication authentication) {
+
+        return ResponseEntity.ok(
+                customerService.getCustomerByUsername(username)
+        );
+    }
+
     // GET CUSTOMER BY ID
 @GetMapping("/{id}")
 @PreAuthorize("hasAnyRole('CUSTOMER', 'MAKER', 'ADMIN')")

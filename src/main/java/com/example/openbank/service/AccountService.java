@@ -104,7 +104,8 @@ public class AccountService {
 
             // Find logged-in customer
             Customer loggedInCustomer = customerRepository
-                    .findByUsername(username)
+                    .findByUsernameIgnoreCase(username)
+                    .or(() -> customerRepository.findByEmailIgnoreCase(username))
                     .orElseThrow(() ->
                             new CustomerNotFoundException(
                                     "Customer not found for username: "
@@ -148,7 +149,8 @@ public class AccountService {
 
             // Find logged-in customer
             Customer loggedInCustomer = customerRepository
-                    .findByUsername(username)
+                    .findByUsernameIgnoreCase(username)
+                    .or(() -> customerRepository.findByEmailIgnoreCase(username))
                     .orElseThrow(() ->
                             new CustomerNotFoundException(
                                     "Customer not found for username: "

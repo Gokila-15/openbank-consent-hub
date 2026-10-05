@@ -1,9 +1,22 @@
 import api from "../api/axios";
-import type { Transaction, Account } from "../types";
+import type {
+  Transaction,
+  Account,
+  CreateTransactionRequest,
+} from "../types";
 
 export const transactionService = {
-  getTransactionsByAccount: async (accountId: number): Promise<Transaction[]> => {
-    const response = await api.get<Transaction[]>(`/api/transactions/account/${accountId}`);
+  getAllTransactions: async (): Promise<Transaction[]> => {
+    const response = await api.get<Transaction[]>("/api/transactions");
+    return response.data;
+  },
+
+  getTransactionsByAccount: async (
+    accountId: number
+  ): Promise<Transaction[]> => {
+    const response = await api.get<Transaction[]>(
+      `/api/transactions/account/${accountId}`
+    );
     return response.data;
   },
 
@@ -12,10 +25,19 @@ export const transactionService = {
     return response.data;
   },
 
+  createTransaction: async (
+    data: CreateTransactionRequest
+  ): Promise<Transaction> => {
+    const response = await api.post<Transaction>("/api/transactions", data);
+    return response.data;
+  },
+
   // Helper to fetch all transactions for all customer accounts
-  getTransactionsForAccounts: async (accounts: Account[]): Promise<Transaction[]> => {
+  getTransactionsForAccounts: async (
+    accounts: Account[]
+  ): Promise<Transaction[]> => {
     if (!accounts || accounts.length === 0) return [];
-    
+
     const promises = accounts.map((account) =>
       transactionService
         .getTransactionsByAccount(account.id)
@@ -26,14 +48,17 @@ export const transactionService = {
           }))
         )
         .catch((err) => {
-          console.error(`Failed to load transactions for account ${account.id}:`, err);
+          console.error(
+            `Failed to load transactions for account ${account.id}:`,
+            err
+          );
           return [] as Transaction[];
         })
     );
 
     const results = await Promise.all(promises);
     const flattened = results.flat();
-    
+
     // Sort transactions by date descending (latest first)
     flattened.sort((a, b) => {
       const dateA = new Date(a.transactionDate).getTime();

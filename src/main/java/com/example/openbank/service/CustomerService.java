@@ -16,29 +16,73 @@ import java.util.List;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final KeycloakAdminService keycloakAdminService;
 
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(
+            CustomerRepository customerRepository,
+            KeycloakAdminService keycloakAdminService) {
+
         this.customerRepository = customerRepository;
+        this.keycloakAdminService = keycloakAdminService;
     }
 
+    // =========================================================
     // CREATE CUSTOMER
+    // =========================================================
+
     public Customer createCustomer(CreateCustomerRequest request) {
 
+        // Create user in Keycloak
+        // and assign CUSTOMER role
+        keycloakAdminService.createCustomerUser(
+                request.getUsername(),
+                request.getEmail(),
+                request.getName(),
+                request.getLastName(),
+                request.getPassword()
+        );
+
+        // Create customer in PostgreSQL
         Customer customer = new Customer();
 
         customer.setName(request.getName());
         customer.setEmail(request.getEmail());
         customer.setPhone(request.getPhone());
 
+        // Same username as Keycloak
+        customer.setUsername(request.getUsername());
+        customer.setPassword(request.getPassword());
         return customerRepository.save(customer);
     }
 
+    // =========================================================
     // GET ALL CUSTOMERS
+    // =========================================================
+
     public List<Customer> getAllCustomers() {
+
         return customerRepository.findAll();
     }
 
+    // =========================================================
+    // GET CUSTOMER BY USERNAME
+    // =========================================================
+
+    public Customer getCustomerByUsername(String username) {
+
+        return customerRepository.findByUsernameIgnoreCase(username)
+                .or(() -> customerRepository.findByEmailIgnoreCase(username))
+                .orElseThrow(() ->
+                        new CustomerNotFoundException(
+                                "Customer not found for username: " + username
+                        )
+                );
+    }
+
+    // =========================================================
     // GET CUSTOMER BY ID
+    // =========================================================
+
     public Customer getCustomerById(
             Long id,
             Authentication authentication) {
@@ -72,7 +116,10 @@ public class CustomerService {
         return customer;
     }
 
+    // =========================================================
     // UPDATE CUSTOMER
+    // =========================================================
+
     public Customer updateCustomer(
             Long id,
             UpdateCustomerRequest request,
@@ -111,21 +158,29 @@ public class CustomerService {
         return customerRepository.save(customer);
     }
 
+    // =========================================================
     // DELETE CUSTOMER
+    // =========================================================
+
     public void deleteCustomer(Long id) {
 
-        Customer customer = getCustomerByIdWithoutAuthentication(id);
+        Customer customer =
+                getCustomerByIdWithoutAuthentication(id);
 
         customerRepository.delete(customer);
     }
 
+    // =========================================================
     // INTERNAL METHOD
-    private Customer getCustomerByIdWithoutAuthentication(Long id) {
+    // =========================================================
+
+    private Customer getCustomerByIdWithoutAuthentication(
+            Long id) {
 
         return customerRepository.findById(id)
                 .orElseThrow(() ->
                         new CustomerNotFoundException(
-                                "Customer not found with ID: " + id
+                                "Customer not found with id: " + id
                         )
                 );
     }

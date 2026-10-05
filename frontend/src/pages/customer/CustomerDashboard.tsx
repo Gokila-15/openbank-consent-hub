@@ -54,21 +54,42 @@ function CustomerDashboard() {
   // Selected account for transaction filtering
   const [selectedAccountIdForTx, setSelectedAccountIdForTx] = useState<number | "ALL">("ALL");
 
-  // Initial load: Fetch Customer Profile (default ID 8 for testing setup)
+  // Initial load: Fetch Customer Profile for logged-in user
   const fetchCustomer = useCallback(async () => {
     try {
       setLoadingCustomer(true);
       setCustomerError(null);
-      // Backend customer ID is 8 for customer1 in PostgreSQL
-      const data = await customerService.getCustomer(8);
+      const data = await customerService.getCurrentCustomer(username);
       setCustomer(data);
     } catch (err: unknown) {
-      console.error("Failed to fetch customer profile:", err);
-      setCustomerError("Unable to load customer profile from server.");
+      console.warn("Could not fetch customer from backend, using Keycloak profile token:", err);
+      const token = keycloak.tokenParsed as any;
+      const currentUsername = token?.preferred_username || username || "customer";
+      const fullName =
+        token?.name ||
+        `${token?.given_name || ""} ${token?.family_name || ""}`.trim() ||
+        currentUsername;
+      const email = token?.email || `${currentUsername}@example.com`;
+      const phone =
+        token?.phone_number ||
+        token?.phone ||
+        token?.attributes?.phone?.[0] ||
+        token?.attributes?.phone_number?.[0] ||
+        "N/A";
+
+      const fallbackCustomer: Customer = {
+        id: 0,
+        name: fullName,
+        email: email,
+        phone: phone,
+        username: currentUsername,
+      };
+      setCustomer(fallbackCustomer);
+      setCustomerError(null);
     } finally {
       setLoadingCustomer(false);
     }
-  }, []);
+  }, [username]);
 
   // Fetch Accounts
   const fetchAccounts = useCallback(async (customerId: number) => {
@@ -76,9 +97,13 @@ function CustomerDashboard() {
       setLoadingAccounts(true);
       setAccountsError(null);
       const data = await accountService.getAccountsByCustomer(customerId);
-      setAccounts(data);
-      return data;
-    } catch (err: unknown) {
+      setAccounts(data || []);
+      return data || [];
+    } catch (err: any) {
+      if (err?.response?.status === 404) {
+        setAccounts([]);
+        return [];
+      }
       console.error("Failed to fetch accounts:", err);
       setAccountsError("Unable to load customer accounts.");
       return [];
@@ -93,7 +118,7 @@ function CustomerDashboard() {
       setLoadingTransactions(true);
       setTransactionsError(null);
       const data = await transactionService.getTransactionsForAccounts(accList);
-      setTransactions(data);
+      setTransactions(data || []);
     } catch (err: unknown) {
       console.error("Failed to fetch transactions:", err);
       setTransactionsError("Unable to load transactions.");
@@ -108,8 +133,12 @@ function CustomerDashboard() {
       setLoadingBeneficiaries(true);
       setBeneficiariesError(null);
       const data = await beneficiaryService.getBeneficiariesByCustomer(customerId);
-      setBeneficiaries(data);
-    } catch (err: unknown) {
+      setBeneficiaries(data || []);
+    } catch (err: any) {
+      if (err?.response?.status === 404) {
+        setBeneficiaries([]);
+        return;
+      }
       console.error("Failed to fetch beneficiaries:", err);
       setBeneficiariesError("Unable to load beneficiaries.");
     } finally {
@@ -123,8 +152,12 @@ function CustomerDashboard() {
       setLoadingConsents(true);
       setConsentsError(null);
       const data = await consentService.getConsentsByCustomer(customerId);
-      setConsents(data);
-    } catch (err: unknown) {
+      setConsents(data || []);
+    } catch (err: any) {
+      if (err?.response?.status === 404) {
+        setConsents([]);
+        return;
+      }
       console.error("Failed to fetch consents:", err);
       setConsentsError("Unable to load consents.");
     } finally {
@@ -332,7 +365,7 @@ function CustomerDashboard() {
         {activeTab === "beneficiaries" && (
           <BeneficiariesView
             beneficiaries={beneficiaries}
-            customerId={customer?.id || 8}
+            customerId={customer?.id || 0}
             loading={loadingBeneficiaries}
             error={beneficiariesError}
             onRefresh={() => customer && fetchBeneficiaries(customer.id)}
@@ -345,7 +378,7 @@ function CustomerDashboard() {
         {activeTab === "consents" && (
           <ConsentsView
             consents={consents}
-            customerId={customer?.id || 8}
+            customerId={customer?.id || 0}
             loading={loadingConsents}
             error={consentsError}
             onRefresh={() => customer && fetchConsents(customer.id)}

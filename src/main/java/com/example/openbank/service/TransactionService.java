@@ -192,7 +192,8 @@ public class TransactionService {
         String username = authentication.getName();
 
         return customerRepository
-                .findByUsername(username)
+                .findByUsernameIgnoreCase(username)
+                .or(() -> customerRepository.findByEmailIgnoreCase(username))
                 .orElseThrow(() ->
                         new CustomerNotFoundException(
                                 "Customer not found for username: "

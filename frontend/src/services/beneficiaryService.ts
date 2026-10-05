@@ -6,7 +6,14 @@ import type {
 } from "../types";
 
 export const beneficiaryService = {
-  getBeneficiariesByCustomer: async (customerId: number): Promise<Beneficiary[]> => {
+  getAllBeneficiaries: async (): Promise<Beneficiary[]> => {
+    const response = await api.get<Beneficiary[]>("/api/beneficiaries");
+    return response.data;
+  },
+
+  getBeneficiariesByCustomer: async (
+    customerId: number
+  ): Promise<Beneficiary[]> => {
     const response = await api.get<Beneficiary[]>(
       `/api/beneficiaries/customers/${customerId}`
     );
@@ -30,6 +37,11 @@ export const beneficiaryService = {
     data: UpdateBeneficiaryRequest
   ): Promise<Beneficiary> => {
     const response = await api.put<Beneficiary>(`/api/beneficiaries/${id}`, data);
+    return response.data;
+  },
+
+  deleteBeneficiary: async (id: number): Promise<Beneficiary> => {
+    const response = await api.delete<Beneficiary>(`/api/beneficiaries/${id}`);
     return response.data;
   },
 };

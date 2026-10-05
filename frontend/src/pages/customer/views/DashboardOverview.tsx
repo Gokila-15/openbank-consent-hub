@@ -70,7 +70,7 @@ export default function DashboardOverview({
         ) : customer ? (
           <div className="profile-card">
             <p>
-              <strong>ID:</strong> {customer.id}
+              <strong>ID:</strong> {customer.id ? `#${customer.id}` : "N/A"}
             </p>
             <p>
               <strong>Name:</strong> {customer.name}
