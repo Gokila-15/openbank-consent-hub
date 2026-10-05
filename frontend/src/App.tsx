@@ -3,6 +3,7 @@ import keycloak from "./keycloak";
 import CustomerDashboard from "./pages/customer/CustomerDashboard";
 import MakerDashboard from "./pages/maker/MakerDashboard";
 import CheckerDashboard from "./pages/checker/CheckerDashboard";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -81,9 +82,14 @@ function App() {
   ).flatMap((r) => r.roles || []);
   const allRoles = [...realmRoles, ...resourceRoles];
 
+  const isAdmin = allRoles.includes("ADMIN") || allRoles.includes("ROLE_ADMIN");
   const isMaker = allRoles.includes("MAKER") || allRoles.includes("ROLE_MAKER");
   const isChecker = allRoles.includes("CHECKER") || allRoles.includes("ROLE_CHECKER");
   const isCustomer = allRoles.includes("CUSTOMER") || allRoles.includes("ROLE_CUSTOMER");
+
+  if (isAdmin) {
+    return <AdminDashboard />;
+  }
 
   if (isMaker) {
     return <MakerDashboard />;
