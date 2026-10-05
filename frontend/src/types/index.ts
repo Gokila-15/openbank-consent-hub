@@ -110,3 +110,7 @@ export interface CreateConsentRequest {
   dataAccess: string;
   expiresAt?: string;
 }
+
+export interface UpdateConsentRequest {
+  status: 'APPROVED' | 'REJECTED' | string;
+}

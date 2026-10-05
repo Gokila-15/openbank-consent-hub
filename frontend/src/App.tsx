@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import keycloak from "./keycloak";
 import CustomerDashboard from "./pages/customer/CustomerDashboard";
 import MakerDashboard from "./pages/maker/MakerDashboard";
+import CheckerDashboard from "./pages/checker/CheckerDashboard";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -81,10 +82,15 @@ function App() {
   const allRoles = [...realmRoles, ...resourceRoles];
 
   const isMaker = allRoles.includes("MAKER") || allRoles.includes("ROLE_MAKER");
+  const isChecker = allRoles.includes("CHECKER") || allRoles.includes("ROLE_CHECKER");
   const isCustomer = allRoles.includes("CUSTOMER") || allRoles.includes("ROLE_CUSTOMER");
 
   if (isMaker) {
     return <MakerDashboard />;
+  }
+
+  if (isChecker) {
+    return <CheckerDashboard />;
   }
 
   if (isCustomer) {
