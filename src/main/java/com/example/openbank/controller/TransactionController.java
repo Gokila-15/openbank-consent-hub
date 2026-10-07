@@ -38,6 +38,29 @@ public class TransactionController {
                 .body(transaction);
     }
 
+    // PUT /api/transactions/{id}/complete
+    @PutMapping("/{id}/complete")
+    @PreAuthorize("hasAnyRole('MAKER', 'ADMIN')")
+    public ResponseEntity<Transaction> completeTransaction(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                transactionService.completeTransaction(id)
+        );
+    }
+
+    // POST /api/transactions/{id}/complete
+    @PostMapping("/{id}/complete")
+    @PreAuthorize("hasAnyRole('MAKER', 'ADMIN')")
+    public ResponseEntity<Transaction> completeTransactionPost(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                transactionService.completeTransaction(id)
+        );
+    }
+
+
     // GET /api/transactions
     @GetMapping
     @PreAuthorize("hasAnyRole('MAKER', 'ADMIN')")
