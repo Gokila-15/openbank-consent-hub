@@ -61,12 +61,12 @@ export default function AdminConsentModal({
   const renderStatusBadge = (status: string) => {
     const s = status?.toUpperCase() || "PENDING";
     if (s === "APPROVED") {
-      return <span className="status-pill status-active">✓ APPROVED</span>;
+      return <span className="status-pill status-active"> APPROVED</span>;
     }
     if (s === "REJECTED") {
-      return <span className="status-pill status-closed">✕ REJECTED</span>;
+      return <span className="status-pill status-closed"> REJECTED</span>;
     }
-    return <span className="status-pill status-pending">⏳ PENDING</span>;
+    return <span className="status-pill status-pending"> PENDING</span>;
   };
 
   return (

@@ -235,10 +235,6 @@ export default function MakerBeneficiariesView({
   return (
     <div className="view-container">
       <div className="section-header-modern">
-        <div>
-          <h2>Beneficiaries Management</h2>
-          <p>Register and maintain verified payees for interbank transfers</p>
-        </div>
         <div className="header-actions">
           <button className="secondary-button" onClick={onRefresh}>
             🔄 Refresh
@@ -274,7 +270,7 @@ export default function MakerBeneficiariesView({
                 <option value="ALL">All Customers ({customers.length})</option>
                 {customers.map((c) => (
                   <option key={c.id} value={c.id}>
-                    #{c.id} - {c.name}
+                    {c.id} - {c.name}
                   </option>
                 ))}
               </select>
@@ -428,7 +424,7 @@ export default function MakerBeneficiariesView({
                   >
                     {customers.map((c) => (
                       <option key={c.id} value={c.id}>
-                        #{c.id} - {c.name} ({c.email})
+                        {c.id} - {c.name} ({c.email})
                       </option>
                     ))}
                   </select>
@@ -514,7 +510,7 @@ export default function MakerBeneficiariesView({
         <div className="modal-backdrop">
           <div className="modal-box">
             <div className="modal-header">
-              <h3>Edit Beneficiary #{editingBeneficiary.id}</h3>
+              <h3>Edit Beneficiary {editingBeneficiary.id}</h3>
               <button className="modal-close" onClick={() => setEditingBeneficiary(null)}>
                 ✕
               </button>

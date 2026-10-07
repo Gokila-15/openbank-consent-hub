@@ -69,7 +69,7 @@ export default function AdminDashboardOverview({
         {/* TOTAL ACCOUNTS */}
         <div
           className="summary-card admin-stat-card"
-          onClick={() => onNavigateTab("system")}
+          onClick={() => onNavigateTab("accounts")}
           style={{ cursor: "pointer" }}
         >
           <div className="summary-card-header">
@@ -83,7 +83,7 @@ export default function AdminDashboardOverview({
         {/* TOTAL TRANSACTIONS */}
         <div
           className="summary-card admin-stat-card"
-          onClick={() => onNavigateTab("system")}
+          onClick={() => onNavigateTab("transactions")}
           style={{ cursor: "pointer" }}
         >
           <div className="summary-card-header">
@@ -97,7 +97,7 @@ export default function AdminDashboardOverview({
         {/* TOTAL BENEFICIARIES */}
         <div
           className="summary-card admin-stat-card"
-          onClick={() => onNavigateTab("system")}
+          onClick={() => onNavigateTab("beneficiaries")}
           style={{ cursor: "pointer" }}
         >
           <div className="summary-card-header">
@@ -175,7 +175,7 @@ export default function AdminDashboardOverview({
             <p>System-wide monitoring, customer record maintenance, and consent management oversight</p>
           </div>
           <button className="secondary-button" onClick={onRefreshAll}>
-            🔄 Refresh Metrics
+            🔄 Refresh 
           </button>
         </div>
 
@@ -191,20 +191,38 @@ export default function AdminDashboardOverview({
 
           <button
             className="action-card"
+            onClick={() => onNavigateTab("accounts")}
+          >
+            <span>💳</span>
+            <strong>Accounts Management</strong>
+            <small>Oversee bank accounts, balances & status</small>
+          </button>
+
+          <button
+            className="action-card"
+            onClick={() => onNavigateTab("transactions")}
+          >
+            <span>📈</span>
+            <strong>Transactions Ledger</strong>
+            <small>Audit log of all financial deposits & withdrawals</small>
+          </button>
+
+          <button
+            className="action-card"
+            onClick={() => onNavigateTab("beneficiaries")}
+          >
+            <span>📋</span>
+            <strong>Beneficiary Payees</strong>
+            <small>Registry of linked customer transfer routes</small>
+          </button>
+
+          <button
+            className="action-card"
             onClick={() => onNavigateTab("consents")}
           >
             <span>🔐</span>
             <strong>Consent Central</strong>
             <small>Oversee all pending, approved & rejected consents</small>
-          </button>
-
-          <button
-            className="action-card"
-            onClick={() => onNavigateTab("system")}
-          >
-            <span>⚙️</span>
-            <strong>System Overview</strong>
-            <small>Inspect banking metrics & IAM role allocation</small>
           </button>
         </div>
       </section>
@@ -216,7 +234,6 @@ export default function AdminDashboardOverview({
           <div className="section-header">
             <div>
               <h2>Recent Customers</h2>
-              <p>Latest registered banking clients</p>
             </div>
             <button
               className="view-button"
@@ -270,7 +287,6 @@ export default function AdminDashboardOverview({
           <div className="section-header">
             <div>
               <h2>Recent Consents</h2>
-              <p>Data access authorization stream</p>
             </div>
             <button
               className="view-button"

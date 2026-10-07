@@ -197,10 +197,6 @@ export default function BeneficiariesView({
   return (
     <div className="view-container">
       <div className="section-header-modern">
-        <div>
-          <h2>Beneficiaries</h2>
-          <p>Manage verified payees for interbank transfers</p>
-        </div>
         <div className="header-actions">
           <button className="secondary-button" onClick={onRefresh}>
             🔄 Refresh

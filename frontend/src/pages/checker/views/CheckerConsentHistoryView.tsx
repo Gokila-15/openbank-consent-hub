@@ -109,10 +109,7 @@ export default function CheckerConsentHistoryView({
     <div className="view-container">
       {/* SECTION HEADER */}
       <div className="section-header-modern">
-        <div>
-          <h2>Consent Audit & Decision History</h2>
-          <p>Historical record of all approved and rejected consent authorizations</p>
-        </div>
+       
         <div className="header-actions">
           <button className="secondary-button" onClick={onRefresh}>
             🔄 Refresh

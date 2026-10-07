@@ -142,7 +142,7 @@ export default function AdminSystemOverview({
             </div>
             <div className="profile-detail-item">
               <span className="detail-label">API Gateway Base URL</span>
-              <span className="detail-value font-mono">http://localhost:8081</span>
+              <span className="detail-value font-mono">/api</span>
             </div>
           </div>
         </section>

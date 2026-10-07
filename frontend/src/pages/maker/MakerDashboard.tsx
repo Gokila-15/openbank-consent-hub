@@ -1,20 +1,22 @@
 import { useEffect, useState, useCallback } from "react";
 import keycloak from "../../keycloak";
-import type { Customer, Account, Beneficiary, Consent } from "../../types";
+import type { Customer, Account, Transaction, Beneficiary, Consent } from "../../types";
 import { customerService } from "../../services/customerService";
 import { accountService } from "../../services/accountService";
+import { transactionService } from "../../services/transactionService";
 import { beneficiaryService } from "../../services/beneficiaryService";
 import { consentService } from "../../services/consentService";
 
 import MakerDashboardOverview from "./views/MakerDashboardOverview";
 import MakerCustomersView from "./views/MakerCustomersView";
 import MakerAccountsView from "./views/MakerAccountsView";
+import MakerTransactionsView from "./views/MakerTransactionsView";
 import MakerBeneficiariesView from "./views/MakerBeneficiariesView";
 import MakerConsentsView from "./views/MakerConsentsView";
 
 import "../customer/CustomerDashboard.css";
 
-type MakerTabType = "dashboard" | "customers" | "accounts" | "beneficiaries" | "consents";
+type MakerTabType = "dashboard" | "customers" | "accounts" | "transactions" | "beneficiaries" | "consents";
 
 export default function MakerDashboard() {
   const username = keycloak.tokenParsed?.preferred_username || "maker1";
@@ -25,18 +27,21 @@ export default function MakerDashboard() {
   // Data states
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
   const [consents, setConsents] = useState<Consent[]>([]);
 
   // Loading states
   const [loadingCustomers, setLoadingCustomers] = useState(false);
   const [loadingAccounts, setLoadingAccounts] = useState(false);
+  const [loadingTransactions, setLoadingTransactions] = useState(false);
   const [loadingBeneficiaries, setLoadingBeneficiaries] = useState(false);
   const [loadingConsents, setLoadingConsents] = useState(false);
 
   // Error states
   const [customersError, setCustomersError] = useState<string | null>(null);
   const [accountsError, setAccountsError] = useState<string | null>(null);
+  const [transactionsError, setTransactionsError] = useState<string | null>(null);
   const [beneficiariesError, setBeneficiariesError] = useState<string | null>(null);
   const [consentsError, setConsentsError] = useState<string | null>(null);
 
@@ -74,6 +79,21 @@ export default function MakerDashboard() {
     }
   }, []);
 
+  // Fetch Transactions
+  const fetchTransactions = useCallback(async () => {
+    try {
+      setLoadingTransactions(true);
+      setTransactionsError(null);
+      const data = await transactionService.getAllTransactions();
+      setTransactions(data);
+    } catch (err: unknown) {
+      console.error("Failed to fetch transactions:", err);
+      setTransactionsError("Unable to load transactions.");
+    } finally {
+      setLoadingTransactions(false);
+    }
+  }, []);
+
   // Fetch Beneficiaries
   const fetchBeneficiaries = useCallback(async () => {
     try {
@@ -107,9 +127,10 @@ export default function MakerDashboard() {
   const refreshAll = useCallback(() => {
     fetchCustomers();
     fetchAccounts();
+    fetchTransactions();
     fetchBeneficiaries();
     fetchConsents();
-  }, [fetchCustomers, fetchAccounts, fetchBeneficiaries, fetchConsents]);
+  }, [fetchCustomers, fetchAccounts, fetchTransactions, fetchBeneficiaries, fetchConsents]);
 
   useEffect(() => {
     refreshAll();
@@ -186,6 +207,14 @@ export default function MakerDashboard() {
           </button>
 
           <button
+            className={`menu-item ${activeTab === "transactions" ? "active" : ""}`}
+            onClick={() => handleNavigateTab("transactions")}
+          >
+            <span className="menu-icon">📈</span>
+            Transactions
+          </button>
+
+          <button
             className={`menu-item ${activeTab === "beneficiaries" ? "active" : ""}`}
             onClick={() => handleNavigateTab("beneficiaries")}
           >
@@ -228,6 +257,7 @@ export default function MakerDashboard() {
                 {activeTab === "dashboard" && "Maker Dashboard"}
                 {activeTab === "customers" && "Customer Directory"}
                 {activeTab === "accounts" && "Accounts Management"}
+                {activeTab === "transactions" && "Transactions Operations"}
                 {activeTab === "beneficiaries" && "Beneficiaries"}
                 {activeTab === "consents" && "Consent Hub"}
               </h1>
@@ -284,6 +314,17 @@ export default function MakerDashboard() {
             onAccountsUpdated={refreshAll}
             selectedCustomerId={selectedCustomerIdForAccounts}
             onSelectCustomer={setSelectedCustomerIdForAccounts}
+          />
+        )}
+
+        {activeTab === "transactions" && (
+          <MakerTransactionsView
+            transactions={transactions}
+            accounts={accounts}
+            loading={loadingTransactions}
+            error={transactionsError}
+            onRefresh={fetchTransactions}
+            onTransactionCreated={refreshAll}
           />
         )}
 

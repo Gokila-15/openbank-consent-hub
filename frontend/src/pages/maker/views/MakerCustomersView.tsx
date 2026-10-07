@@ -275,10 +275,7 @@ export default function MakerCustomersView({
   return (
     <div className="view-container">
       <div className="section-header-modern">
-        <div>
-          <h2>Customer Directory</h2>
-          <p>Register, update, and manage bank customer profiles</p>
-        </div>
+      
         <div className="header-actions">
           <button className="secondary-button" onClick={onRefresh}>
             🔄 Refresh
@@ -577,9 +574,6 @@ export default function MakerCustomersView({
               <p>
                 Are you sure you want to delete customer <strong>{deletingCustomer.name}</strong> ({deletingCustomer.email})?
               </p>
-              <div className="alert-box error-alert">
-                <span>⚠️ This action permanently deletes the customer record from PostgreSQL.</span>
-              </div>
             </div>
             <div className="modal-footer">
               <button

@@ -81,10 +81,7 @@ export default function TransactionsView({
   return (
     <div className="view-container">
       <div className="section-header-modern">
-        <div>
-          <h2>Transaction History</h2>
-          <p>Real-time audit log of your deposits, withdrawals, and transfers</p>
-        </div>
+        
         <button className="secondary-button" onClick={onRefresh}>
           🔄 Refresh
         </button>
@@ -242,7 +239,7 @@ export default function TransactionsView({
             <div className="modal-body">
               <div className="modal-detail-row">
                 <span className="detail-label">Transaction ID</span>
-                <span className="detail-value font-mono">#{selectedTx.id}</span>
+                <span className="detail-value font-mono">{selectedTx.id}</span>
               </div>
               <div className="modal-detail-row">
                 <span className="detail-label">Date & Time</span>

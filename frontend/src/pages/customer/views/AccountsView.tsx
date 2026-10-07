@@ -61,10 +61,6 @@ export default function AccountsView({
   return (
     <div className="view-container">
       <div className="section-header-modern">
-        <div>
-          <h2>My Accounts</h2>
-          <p>Real-time view of your OpenBank savings, checking, and deposit accounts</p>
-        </div>
         <button className="secondary-button" onClick={onRefresh}>
           🔄 Refresh
         </button>
@@ -158,7 +154,7 @@ export default function AccountsView({
             <div className="modal-body">
               <div className="modal-detail-row">
                 <span className="detail-label">Account ID</span>
-                <span className="detail-value font-mono">#{selectedAccount.id}</span>
+                <span className="detail-value font-mono">{selectedAccount.id}</span>
               </div>
               <div className="modal-detail-row">
                 <span className="detail-label">Account Number</span>

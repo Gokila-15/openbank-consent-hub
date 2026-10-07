@@ -32,6 +32,14 @@ public class CustomerService {
 
     public Customer createCustomer(CreateCustomerRequest request) {
 
+        if (customerRepository.findByUsernameIgnoreCase(request.getUsername()).isPresent()) {
+            throw new BusinessException("Customer with username '" + request.getUsername() + "' already exists");
+        }
+
+        if (customerRepository.findByEmailIgnoreCase(request.getEmail()).isPresent()) {
+            throw new BusinessException("Customer with email '" + request.getEmail() + "' already exists");
+        }
+
         // Create user in Keycloak
         // and assign CUSTOMER role
         keycloakAdminService.createCustomerUser(

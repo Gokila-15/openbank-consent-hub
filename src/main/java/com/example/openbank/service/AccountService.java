@@ -209,10 +209,20 @@ public class AccountService {
         Account account =
                 getAccountByIdWithoutAuthentication(id);
 
-        if ("CLOSED".equals(account.getStatus())) {
+        if ("CLOSED".equalsIgnoreCase(account.getStatus())) {
 
-            throw new RuntimeException(
+            throw new BusinessException(
                     "Account is already closed");
+        }
+        if (account.getBalance() != null || account.getBalance().compareTo(java.math.BigDecimal.ZERO) != 0) {
+
+            throw new BusinessException(
+                    "Account cannot be closed when balance is not zero");
+        }
+        if (account.getBalance().compareTo(java.math.BigDecimal.ZERO) < 0) {
+
+            throw new BusinessException(
+                    "Account cannot be closed with negative balance");
         }
 
         account.setStatus("CLOSED");

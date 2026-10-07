@@ -178,10 +178,7 @@ export default function AdminBeneficiariesView({
     <div className="view-container">
       {/* HEADER */}
       <div className="section-header-modern">
-        <div>
-          <h2>Beneficiary Directory (Admin)</h2>
-          <p>System-wide registry of interbank payees and linked customer transfer routes</p>
-        </div>
+      
         <div className="header-actions">
           <button className="secondary-button" onClick={onRefresh}>
             🔄 Refresh

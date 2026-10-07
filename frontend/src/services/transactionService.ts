@@ -7,7 +7,7 @@ import type {
 
 export const transactionService = {
   getAllTransactions: async (): Promise<Transaction[]> => {
-    const response = await api.get<Transaction[]>("/api/transactions");
+    const response = await api.get<Transaction[]>("/transactions");
     return response.data;
   },
 
@@ -15,20 +15,20 @@ export const transactionService = {
     accountId: number
   ): Promise<Transaction[]> => {
     const response = await api.get<Transaction[]>(
-      `/api/transactions/account/${accountId}`
+      `/transactions/account/${accountId}`
     );
     return response.data;
   },
 
   getTransactionById: async (id: number): Promise<Transaction> => {
-    const response = await api.get<Transaction>(`/api/transactions/${id}`);
+    const response = await api.get<Transaction>(`/transactions/${id}`);
     return response.data;
   },
 
   createTransaction: async (
     data: CreateTransactionRequest
   ): Promise<Transaction> => {
-    const response = await api.post<Transaction>("/api/transactions", data);
+    const response = await api.post<Transaction>("/transactions", data);
     return response.data;
   },
 

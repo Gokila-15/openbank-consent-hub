@@ -7,18 +7,18 @@ import type {
 
 export const customerService = {
   getAllCustomers: async (): Promise<Customer[]> => {
-    const response = await api.get<Customer[]>("/api/customers");
+    const response = await api.get<Customer[]>("/customers");
     return response.data;
   },
 
   getCustomer: async (id: number): Promise<Customer> => {
-    const response = await api.get<Customer>(`/api/customers/${id}`);
+    const response = await api.get<Customer>(`/customers/${id}`);
     return response.data;
   },
 
   getCurrentCustomer: async (username?: string): Promise<Customer> => {
     try {
-      const response = await api.get<Customer>("/api/customers/me");
+      const response = await api.get<Customer>("/customers/me");
       if (response.data && response.data.id) {
         return response.data;
       }
@@ -28,7 +28,7 @@ export const customerService = {
 
     if (username) {
       const response = await api.get<Customer>(
-        `/api/customers/username/${encodeURIComponent(username)}`
+        `/customers/username/${encodeURIComponent(username)}`
       );
       return response.data;
     }
@@ -37,7 +37,7 @@ export const customerService = {
   },
 
   createCustomer: async (data: CreateCustomerRequest): Promise<Customer> => {
-    const response = await api.post<Customer>("/api/customers", data);
+    const response = await api.post<Customer>("/customers", data);
     return response.data;
   },
 
@@ -45,11 +45,11 @@ export const customerService = {
     id: number,
     data: UpdateCustomerRequest
   ): Promise<Customer> => {
-    const response = await api.put<Customer>(`/api/customers/${id}`, data);
+    const response = await api.put<Customer>(`/customers/${id}`, data);
     return response.data;
   },
 
   deleteCustomer: async (id: number): Promise<void> => {
-    await api.delete(`/api/customers/${id}`);
+    await api.delete(`/customers/${id}`);
   },
 };

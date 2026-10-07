@@ -3,24 +3,24 @@ import type { Consent, CreateConsentRequest, UpdateConsentRequest } from "../typ
 
 export const consentService = {
   getAllConsents: async (): Promise<Consent[]> => {
-    const response = await api.get<Consent[]>("/api/consents");
+    const response = await api.get<Consent[]>("/consents");
     return response.data;
   },
 
   getConsentsByCustomer: async (customerId: number): Promise<Consent[]> => {
     const response = await api.get<Consent[]>(
-      `/api/consents/customer/${customerId}`
+      `/consents/customer/${customerId}`
     );
     return response.data;
   },
 
   getConsentById: async (id: number): Promise<Consent> => {
-    const response = await api.get<Consent>(`/api/consents/${id}`);
+    const response = await api.get<Consent>(`/consents/${id}`);
     return response.data;
   },
 
   createConsent: async (data: CreateConsentRequest): Promise<Consent> => {
-    const response = await api.post<Consent>("/api/consents", data);
+    const response = await api.post<Consent>("/consents", data);
     return response.data;
   },
 
@@ -28,7 +28,7 @@ export const consentService = {
     id: number,
     data: UpdateConsentRequest
   ): Promise<Consent> => {
-    const response = await api.put<Consent>(`/api/consents/${id}`, data);
+    const response = await api.put<Consent>(`/consents/${id}`, data);
     return response.data;
   },
 };

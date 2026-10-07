@@ -7,7 +7,7 @@ import type {
 
 export const beneficiaryService = {
   getAllBeneficiaries: async (): Promise<Beneficiary[]> => {
-    const response = await api.get<Beneficiary[]>("/api/beneficiaries");
+    const response = await api.get<Beneficiary[]>("/beneficiaries");
     return response.data;
   },
 
@@ -15,20 +15,20 @@ export const beneficiaryService = {
     customerId: number
   ): Promise<Beneficiary[]> => {
     const response = await api.get<Beneficiary[]>(
-      `/api/beneficiaries/customers/${customerId}`
+      `/beneficiaries/customers/${customerId}`
     );
     return response.data;
   },
 
   getBeneficiaryById: async (id: number): Promise<Beneficiary> => {
-    const response = await api.get<Beneficiary>(`/api/beneficiaries/${id}`);
+    const response = await api.get<Beneficiary>(`/beneficiaries/${id}`);
     return response.data;
   },
 
   createBeneficiary: async (
     data: CreateBeneficiaryRequest
   ): Promise<Beneficiary> => {
-    const response = await api.post<Beneficiary>("/api/beneficiaries", data);
+    const response = await api.post<Beneficiary>("/beneficiaries", data);
     return response.data;
   },
 
@@ -36,12 +36,12 @@ export const beneficiaryService = {
     id: number,
     data: UpdateBeneficiaryRequest
   ): Promise<Beneficiary> => {
-    const response = await api.put<Beneficiary>(`/api/beneficiaries/${id}`, data);
+    const response = await api.put<Beneficiary>(`/beneficiaries/${id}`, data);
     return response.data;
   },
 
   deleteBeneficiary: async (id: number): Promise<Beneficiary> => {
-    const response = await api.delete<Beneficiary>(`/api/beneficiaries/${id}`);
+    const response = await api.delete<Beneficiary>(`/beneficiaries/${id}`);
     return response.data;
   },
 };

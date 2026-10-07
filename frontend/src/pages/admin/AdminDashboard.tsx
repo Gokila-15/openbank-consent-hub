@@ -13,7 +13,6 @@ import AdminAccountsView from "./views/AdminAccountsView";
 import AdminTransactionsView from "./views/AdminTransactionsView";
 import AdminBeneficiariesView from "./views/AdminBeneficiariesView";
 import AdminConsentsView from "./views/AdminConsentsView";
-import AdminSystemOverview from "./views/AdminSystemOverview";
 import AdminCustomerModal from "./views/AdminCustomerModal";
 import AdminConsentModal from "./views/AdminConsentModal";
 
@@ -27,8 +26,7 @@ type AdminTabType =
   | "accounts"
   | "transactions"
   | "beneficiaries"
-  | "consents"
-  | "system";
+  | "consents";
 
 export default function AdminDashboard() {
   const username = keycloak.tokenParsed?.preferred_username || "admin";
@@ -262,14 +260,6 @@ export default function AdminDashboard() {
               </span>
             )}
           </button>
-
-          <button
-            className={`menu-item ${activeTab === "system" ? "active" : ""}`}
-            onClick={() => handleNavigateTab("system")}
-          >
-            <span className="menu-icon">⚙️</span>
-            System Overview
-          </button>
         </nav>
 
         <button className="logout-button" onClick={() => keycloak.logout()}>
@@ -298,7 +288,6 @@ export default function AdminDashboard() {
                 {activeTab === "transactions" && "Transactions Ledger"}
                 {activeTab === "beneficiaries" && "Beneficiary Payees"}
                 {activeTab === "consents" && "Consent Management"}
-                {activeTab === "system" && "System Overview"}
               </h1>
               <p>Welcome back, {username}</p>
             </div>
@@ -379,9 +368,11 @@ export default function AdminDashboard() {
         {activeTab === "transactions" && (
           <AdminTransactionsView
             transactions={transactions}
+            accounts={accounts}
             loading={loading}
             error={error}
             onRefresh={fetchAllData}
+            onTransactionCreated={fetchAllData}
           />
         )}
 
@@ -403,18 +394,6 @@ export default function AdminDashboard() {
             error={error}
             onRefresh={fetchAllData}
             onReviewConsent={handleReviewConsent}
-          />
-        )}
-
-        {activeTab === "system" && (
-          <AdminSystemOverview
-            customers={customers}
-            accounts={accounts}
-            transactions={transactions}
-            beneficiaries={beneficiaries}
-            consents={consents}
-            loading={loading}
-            onRefresh={fetchAllData}
           />
         )}
 

@@ -37,18 +37,6 @@ export default function MakerDashboardOverview({
     (b) => b.status?.toUpperCase() === "ACTIVE"
   ).length;
 
-  const totalBalance = accounts.reduce(
-    (sum, acc) => sum + (acc.balance ? Number(acc.balance) : 0),
-    0
-  );
-
-  const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 2,
-    }).format(val);
-  };
 
   return (
     <div className="view-container">
@@ -61,7 +49,7 @@ export default function MakerDashboardOverview({
         >
           <p>Total Customers</p>
           <h2>{loadingCustomers ? "..." : customers.length}</h2>
-          <span>Registered in PostgreSQL</span>
+          <span>Registered Customers</span>
         </div>
 
         <div
@@ -100,12 +88,9 @@ export default function MakerDashboardOverview({
       {/* OPERATIONS OVERVIEW */}
       <section className="dashboard-section">
         <div className="section-header">
-          <div>
-            <h2>Maker Operations Center</h2>
-            <p>Initiate banking workflows, account creations, and data consent grants</p>
-          </div>
+       
           <button className="secondary-button" onClick={onRefreshAll}>
-            🔄 Refresh Metrics
+            🔄 Refresh 
           </button>
         </div>
 
@@ -126,6 +111,15 @@ export default function MakerDashboardOverview({
             <span>💳</span>
             <strong>Manage Accounts</strong>
             <small>Open & update savings/checking accounts</small>
+          </button>
+
+          <button
+            className="action-card"
+            onClick={() => onNavigateTab("transactions")}
+          >
+            <span>📈</span>
+            <strong>Transactions</strong>
+            <small>Deposit & withdraw customer funds</small>
           </button>
 
           <button
@@ -194,36 +188,7 @@ export default function MakerDashboardOverview({
           )}
         </section>
 
-        <section className="view-card security-overview-card">
-          <h3>Maker Role Responsibilities</h3>
-          <p className="subtext">
-            Operational boundaries defined by OpenBank Four-Eyes Security Policy.
-          </p>
-
-          <div className="security-badges">
-            <div className="security-item">
-              <div className="security-icon">✍️</div>
-              <div>
-                <strong>Maker Authority</strong>
-                <p>Authorized to create customers, open accounts, and create consent requests.</p>
-              </div>
-            </div>
-            <div className="security-item">
-              <div className="security-icon">⚖️</div>
-              <div>
-                <strong>Four-Eyes Verification</strong>
-                <p>Consents created by Makers require independent CHECKER or ADMIN approval.</p>
-              </div>
-            </div>
-            <div className="security-item">
-              <div className="security-icon">💰</div>
-              <div>
-                <strong>Managed Balance Volume</strong>
-                <p>{formatCurrency(totalBalance)} total funds active in accounts.</p>
-              </div>
-            </div>
-          </div>
-        </section>
+       
       </div>
     </div>
   );

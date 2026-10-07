@@ -136,12 +136,7 @@ export default function ConsentsView({
   return (
     <div className="view-container">
       <div className="section-header-modern">
-        <div>
-          <h2>Consent Hub</h2>
-          <p>
-            Control third-party open banking data access and permissions
-          </p>
-        </div>
+
         <div className="header-actions">
           <button className="secondary-button" onClick={onRefresh}>
             🔄 Refresh

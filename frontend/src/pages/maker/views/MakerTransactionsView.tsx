@@ -2,23 +2,23 @@ import { useState, useMemo } from "react";
 import type { Transaction, Account, CreateTransactionRequest } from "../../../types";
 import { transactionService } from "../../../services/transactionService";
 
-interface AdminTransactionsViewProps {
+interface MakerTransactionsViewProps {
   transactions: Transaction[];
-  accounts?: Account[];
+  accounts: Account[];
   loading: boolean;
   error: string | null;
   onRefresh: () => void;
-  onTransactionCreated?: () => void;
+  onTransactionCreated: () => void;
 }
 
-export default function AdminTransactionsView({
+export default function MakerTransactionsView({
   transactions,
-  accounts = [],
+  accounts,
   loading,
   error,
   onRefresh,
   onTransactionCreated,
-}: AdminTransactionsViewProps) {
+}: MakerTransactionsViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("ALL");
   const [viewingTx, setViewingTx] = useState<Transaction | null>(null);
@@ -45,7 +45,7 @@ export default function AdminTransactionsView({
     setSelectedAccountId(accounts[0]?.id || 0);
     setTxType("DEPOSIT");
     setAmount(1000);
-    setDescription("Admin manual adjustment");
+    setDescription("Maker transaction");
     setFormError(null);
     setIsCreateOpen(true);
   };
@@ -77,11 +77,7 @@ export default function AdminTransactionsView({
       await transactionService.createTransaction(req);
       setSuccessMessage(`Transaction created successfully: ${txType} ${formatCurrency(amount)}`);
       setIsCreateOpen(false);
-      if (onTransactionCreated) {
-        onTransactionCreated();
-      } else {
-        onRefresh();
-      }
+      onTransactionCreated();
     } catch (err: any) {
       console.error("Failed to create transaction:", err);
       let msg = "Failed to process transaction.";
@@ -159,13 +155,13 @@ export default function AdminTransactionsView({
     <div className="view-container">
       {/* HEADER */}
       <div className="section-header-modern">
-     
+       
         <div className="header-actions">
-          <button className="secondary-button" onClick={onRefresh}>
-            🔄 Refresh
-          </button>
-           <button className="primary-button" onClick={openCreateModal}>
+          <button className="primary-button" onClick={openCreateModal}>
             + Create Transaction
+          </button>
+          <button className="secondary-button" onClick={onRefresh}>
+            🔄 Refresh 
           </button>
         </div>
       </div>
@@ -180,14 +176,14 @@ export default function AdminTransactionsView({
       {/* MINI STATS */}
       <div className="admin-summary-grid" style={{ marginBottom: "18px" }}>
         <div className="summary-card admin-stat-card">
-          <p>Total Transaction Entries</p>
+          <p>Total Transactions</p>
           <h2>{transactions.length}</h2>
-          <span>Recorded Transaction</span>
+          <span>Total Entries</span>
         </div>
         <div className="summary-card admin-stat-card">
           <p>Total Transaction Volume</p>
           <h2>{formatCurrency(totalVolume)}</h2>
-          <span>Cumulative Flow</span>
+          <span>Total Amount</span>
         </div>
         <div className="summary-card admin-stat-card">
           <p>Total Deposits</p>
@@ -205,9 +201,9 @@ export default function AdminTransactionsView({
       <div className="view-card filter-bar-card">
         <div className="filters-grid">
           <div className="filter-group filter-search" style={{ flex: 1 }}>
-            <label htmlFor="admin-search-tx">Search Transactions</label>
+            <label htmlFor="maker-search-tx">Search Transactions</label>
             <input
-              id="admin-search-tx"
+              id="maker-search-tx"
               type="text"
               placeholder="Search by ID, Account No, Customer Name, Description..."
               value={searchTerm}
@@ -216,9 +212,9 @@ export default function AdminTransactionsView({
           </div>
 
           <div className="filter-group">
-            <label htmlFor="admin-tx-type">Transaction Type</label>
+            <label htmlFor="maker-tx-type">Transaction Type</label>
             <select
-              id="admin-tx-type"
+              id="maker-tx-type"
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
             >
@@ -251,7 +247,7 @@ export default function AdminTransactionsView({
             <h3>No Transactions Found</h3>
             <p>
               {transactions.length === 0
-                ? "No transactions have been processed yet in OpenBank."
+                ? "No transactions have been processed yet."
                 : "No transactions matched the search and filter criteria."}
             </p>
           </div>
@@ -344,12 +340,12 @@ export default function AdminTransactionsView({
                 )}
 
                 <div className="form-group">
-                  <label htmlFor="admin-create-tx-acc">Target Account *</label>
+                  <label htmlFor="maker-create-tx-acc">Target Account *</label>
                   {accounts.length === 0 ? (
                     <p className="text-muted-small">No accounts available.</p>
                   ) : (
                     <select
-                      id="admin-create-tx-acc"
+                      id="maker-create-tx-acc"
                       value={selectedAccountId}
                       onChange={(e) => setSelectedAccountId(Number(e.target.value))}
                       required
@@ -364,9 +360,9 @@ export default function AdminTransactionsView({
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="admin-create-tx-type">Transaction Type *</label>
+                  <label htmlFor="maker-create-tx-type">Transaction Type *</label>
                   <select
-                    id="admin-create-tx-type"
+                    id="maker-create-tx-type"
                     value={txType}
                     onChange={(e) => setTxType(e.target.value as "DEPOSIT" | "WITHDRAWAL")}
                   >
@@ -376,9 +372,9 @@ export default function AdminTransactionsView({
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="admin-create-tx-amount">Amount (₹) *</label>
+                  <label htmlFor="maker-create-tx-amount">Amount (₹) *</label>
                   <input
-                    id="admin-create-tx-amount"
+                    id="maker-create-tx-amount"
                     type="number"
                     step="0.01"
                     min="1"
@@ -389,13 +385,13 @@ export default function AdminTransactionsView({
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="admin-create-tx-desc">Description</label>
+                  <label htmlFor="maker-create-tx-desc">Description</label>
                   <input
-                    id="admin-create-tx-desc"
+                    id="maker-create-tx-desc"
                     type="text"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="e.g. Admin deposit, system test"
+                    placeholder="e.g. Branch deposit, Maker transfer"
                   />
                 </div>
               </div>

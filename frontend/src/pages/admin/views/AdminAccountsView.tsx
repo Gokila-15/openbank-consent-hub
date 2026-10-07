@@ -1,6 +1,13 @@
 import { useState, useMemo } from "react";
-import type { Account, Customer, CreateAccountRequest, UpdateAccountRequest } from "../../../types";
+import type {
+  Account,
+  Customer,
+  CreateAccountRequest,
+  UpdateAccountRequest,
+  CreateTransactionRequest,
+} from "../../../types";
 import { accountService } from "../../../services/accountService";
+import { transactionService } from "../../../services/transactionService";
 
 interface AdminAccountsViewProps {
   accounts: Account[];
@@ -27,6 +34,7 @@ export default function AdminAccountsView({
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
   const [closingAccount, setClosingAccount] = useState<Account | null>(null);
+  const [transactingAccount, setTransactingAccount] = useState<Account | null>(null);
   const [viewingAccount, setViewingAccount] = useState<Account | null>(null);
 
   // Forms
@@ -39,6 +47,13 @@ export default function AdminAccountsView({
   const [editForm, setEditForm] = useState<UpdateAccountRequest>({
     accountType: "SAVINGS",
     status: "ACTIVE",
+  });
+
+  const [txForm, setTxForm] = useState<CreateTransactionRequest>({
+    accountId: 0,
+    type: "DEPOSIT",
+    amount: 1000,
+    description: "",
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -119,6 +134,49 @@ export default function AdminAccountsView({
     }
   };
 
+  const openTxModal = (acc: Account) => {
+    setTransactingAccount(acc);
+    setTxForm({
+      accountId: acc.id,
+      type: "DEPOSIT",
+      amount: 1000,
+      description: "Admin manual adjustment",
+    });
+    setFormError(null);
+  };
+
+  const handleTxSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!transactingAccount) return;
+    setFormError(null);
+
+    if (!txForm.amount || Number(txForm.amount) <= 0) {
+      setFormError("Amount must be greater than zero.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      await transactionService.createTransaction({
+        ...txForm,
+        accountId: transactingAccount.id,
+        amount: Number(txForm.amount),
+      });
+      setActionSuccess(`Transaction completed: ${txForm.type} of ${formatCurrency(Number(txForm.amount))} on account #${transactingAccount.accountNumber}`);
+      setTransactingAccount(null);
+      onAccountsUpdated();
+    } catch (err: any) {
+      console.error("Transaction failed:", err);
+      let msg = "Failed to process transaction.";
+      if (err?.response?.data?.message) {
+        msg = err.response.data.message;
+      }
+      setFormError(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleCloseAccount = async () => {
     if (!closingAccount) return;
     try {
@@ -186,10 +244,6 @@ export default function AdminAccountsView({
     <div className="view-container">
       {/* HEADER */}
       <div className="section-header-modern">
-        <div>
-          <h2>Bank Accounts Administration</h2>
-          <p>Global oversight of savings and current accounts, fund balances, and account status</p>
-        </div>
         <div className="header-actions">
           <button className="secondary-button" onClick={onRefresh}>
             🔄 Refresh
@@ -320,6 +374,16 @@ export default function AdminAccountsView({
                         >
                           Details
                         </button>
+                        {acc.status?.toUpperCase() === "ACTIVE" && (
+                          <button
+                            className="table-action-btn"
+                            style={{ color: "#0284c7", borderColor: "rgba(2, 132, 199, 0.3)" }}
+                            onClick={() => openTxModal(acc)}
+                            title="Deposit or withdraw funds"
+                          >
+                            Transact
+                          </button>
+                        )}
                         <button
                           className="table-action-btn admin-edit-btn"
                           onClick={() => openEditModal(acc)}
@@ -345,6 +409,96 @@ export default function AdminAccountsView({
           </div>
         )}
       </div>
+
+      {/* CREATE TRANSACTION (DEPOSIT/WITHDRAWAL) MODAL */}
+      {transactingAccount && (
+        <div className="modal-backdrop">
+          <div className="modal-box">
+            <div className="modal-header">
+              <h3>Account Transaction #{transactingAccount.accountNumber}</h3>
+              <button className="modal-close" onClick={() => setTransactingAccount(null)}>
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handleTxSubmit}>
+              <div className="modal-body">
+                {formError && (
+                  <div className="alert-box error-alert">
+                    <span>⚠️ {formError}</span>
+                  </div>
+                )}
+                <div className="modal-detail-row">
+                  <span className="detail-label">Account Owner</span>
+                  <span className="detail-value font-semibold">
+                    {transactingAccount.customer?.name || "Client"}
+                  </span>
+                </div>
+                <div className="modal-detail-row">
+                  <span className="detail-label">Current Balance</span>
+                  <span className="detail-value font-bold font-mono">
+                    {formatCurrency(Number(transactingAccount.balance))}
+                  </span>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="admin-acc-tx-type">Transaction Type *</label>
+                  <select
+                    id="admin-acc-tx-type"
+                    value={txForm.type}
+                    onChange={(e) =>
+                      setTxForm({ ...txForm, type: e.target.value as "DEPOSIT" | "WITHDRAWAL" })
+                    }
+                  >
+                    <option value="DEPOSIT">DEPOSIT (Credit)</option>
+                    <option value="WITHDRAWAL">WITHDRAWAL (Debit)</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="admin-acc-tx-amount">Amount (₹) *</label>
+                  <input
+                    id="admin-acc-tx-amount"
+                    type="number"
+                    step="0.01"
+                    min="1"
+                    value={txForm.amount}
+                    onChange={(e) =>
+                      setTxForm({ ...txForm, amount: Number(e.target.value) })
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="admin-acc-tx-desc">Description</label>
+                  <input
+                    id="admin-acc-tx-desc"
+                    type="text"
+                    value={txForm.description || ""}
+                    onChange={(e) =>
+                      setTxForm({ ...txForm, description: e.target.value })
+                    }
+                    placeholder="e.g. Deposit, Branch adjustment"
+                  />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => setTransactingAccount(null)}
+                  disabled={submitting}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="primary-button" disabled={submitting}>
+                  {submitting ? "Processing..." : "Submit Transaction"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* CREATE ACCOUNT MODAL */}
       {isAddOpen && (

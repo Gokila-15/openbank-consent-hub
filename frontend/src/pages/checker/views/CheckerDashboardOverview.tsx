@@ -44,7 +44,7 @@ export default function CheckerDashboardOverview({
         >
           <div className="summary-card-header">
             <p>Pending Consents</p>
-            <span className="summary-icon">⏳</span>
+            
           </div>
           <h2>{loading ? "..." : pendingCount}</h2>
           <span style={{ color: pendingCount > 0 ? "#b45309" : "#0d9488", fontWeight: 600 }}>
@@ -60,7 +60,7 @@ export default function CheckerDashboardOverview({
         >
           <div className="summary-card-header">
             <p>Approved</p>
-            <span className="summary-icon">✓</span>
+         
           </div>
           <h2>{loading ? "..." : approvedCount}</h2>
           <span style={{ color: "#15803d", fontWeight: 600 }}>Active Authorizations</span>
@@ -74,7 +74,7 @@ export default function CheckerDashboardOverview({
         >
           <div className="summary-card-header">
             <p>Rejected</p>
-            <span className="summary-icon">✕</span>
+        
           </div>
           <h2>{loading ? "..." : rejectedCount}</h2>
           <span style={{ color: "#dc2626", fontWeight: 600 }}>Declined Authorizations</span>
@@ -88,7 +88,7 @@ export default function CheckerDashboardOverview({
         >
           <div className="summary-card-header">
             <p>Total Reviewed</p>
-            <span className="summary-icon">📊</span>
+          
           </div>
           <h2>{loading ? "..." : totalReviewedCount}</h2>
           <span>Approved + Rejected</span>
@@ -115,7 +115,7 @@ export default function CheckerDashboardOverview({
       ) : (
         <div className="checker-alert-banner success-banner">
           <div className="banner-left">
-            <span className="banner-icon">✨</span>
+            
             <div>
               <strong>All Pending Consents Reviewed</strong>
               <p>There are no consent requests awaiting verification at this time.</p>
@@ -205,42 +205,6 @@ export default function CheckerDashboardOverview({
               </table>
             </div>
           )}
-        </section>
-
-        {/* CHECKER ROLE POLICY CARD */}
-        <section className="view-card security-overview-card">
-          <div className="section-header">
-            <div>
-              <h2>Four-Eyes Governance</h2>
-              <p>Checker portal guidelines and security boundary rules</p>
-            </div>
-          </div>
-
-          <div className="security-badges">
-            <div className="security-item">
-              <div className="security-icon">⚖️</div>
-              <div>
-                <strong>Verification Authority</strong>
-                <p>Checkers hold sole authority to Approve or Reject consent requests initiated by Makers.</p>
-              </div>
-            </div>
-
-            <div className="security-item">
-              <div className="security-icon">🚫</div>
-              <div>
-                <strong>Strict Maker-Checker Separation</strong>
-                <p>Checkers cannot create customers, accounts, beneficiaries, or consent requests.</p>
-              </div>
-            </div>
-
-            <div className="security-item">
-              <div className="security-icon">🛡️</div>
-              <div>
-                <strong>Self-Approval Defense</strong>
-                <p>If a Checker initiated a request, the backend prevents them from approving their own request.</p>
-              </div>
-            </div>
-          </div>
         </section>
       </div>
     </div>

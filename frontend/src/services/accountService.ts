@@ -7,24 +7,24 @@ import type {
 
 export const accountService = {
   getAllAccounts: async (): Promise<Account[]> => {
-    const response = await api.get<Account[]>("/api/accounts");
+    const response = await api.get<Account[]>("/accounts");
     return response.data;
   },
 
   getAccountsByCustomer: async (customerId: number): Promise<Account[]> => {
     const response = await api.get<Account[]>(
-      `/api/accounts/customer/${customerId}`
+      `/accounts/customer/${customerId}`
     );
     return response.data;
   },
 
   getAccountById: async (id: number): Promise<Account> => {
-    const response = await api.get<Account>(`/api/accounts/${id}`);
+    const response = await api.get<Account>(`/accounts/${id}`);
     return response.data;
   },
 
   createAccount: async (data: CreateAccountRequest): Promise<Account> => {
-    const response = await api.post<Account>("/api/accounts", data);
+    const response = await api.post<Account>("/accounts", data);
     return response.data;
   },
 
@@ -32,12 +32,12 @@ export const accountService = {
     id: number,
     data: UpdateAccountRequest
   ): Promise<Account> => {
-    const response = await api.put<Account>(`/api/accounts/${id}`, data);
+    const response = await api.put<Account>(`/accounts/${id}`, data);
     return response.data;
   },
 
   deleteAccount: async (id: number): Promise<Account> => {
-    const response = await api.delete<Account>(`/api/accounts/${id}`);
+    const response = await api.delete<Account>(`/accounts/${id}`);
     return response.data;
   },
 };

@@ -91,10 +91,7 @@ export default function ProfileView({
   return (
     <div className="view-container">
       <div className="section-header-modern">
-        <div>
-          <h2>My Profile</h2>
-          <p>View and manage your registered personal information</p>
-        </div>
+        
         <button className="primary-button" onClick={startEdit}>
           ✏️ Edit Profile
         </button>
@@ -129,7 +126,7 @@ export default function ProfileView({
           <div className="profile-details-list">
             <div className="profile-detail-item">
               <span className="detail-label">Customer ID</span>
-              <span className="detail-value font-mono">#{customer.id}</span>
+              <span className="detail-value font-mono">{customer.id}</span>
             </div>
             <div className="profile-detail-item">
               <span className="detail-label">Username</span>
@@ -158,34 +155,8 @@ export default function ProfileView({
           </div>
         </div>
 
-        <div className="view-card security-overview-card">
-          <h3>Security & Account Access</h3>
-          <p className="subtext">Your account security settings and authentication details.</p>
+      
           
-          <div className="security-badges">
-            <div className="security-item">
-              <div className="security-icon">🛡️</div>
-              <div>
-                <strong>Single Sign-On (SSO)</strong>
-                <p>Secured via OpenBank Keycloak OIDC authentication</p>
-              </div>
-            </div>
-            <div className="security-item">
-              <div className="security-icon">🔒</div>
-              <div>
-                <strong>Role Authorization</strong>
-                <p>CUSTOMER role active with scoped resource protection</p>
-              </div>
-            </div>
-            <div className="security-item">
-              <div className="security-icon">📑</div>
-              <div>
-                <strong>Consent Hub Protocol</strong>
-                <p>Third-party data sharing protected by checker verification</p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* EDIT MODAL */}

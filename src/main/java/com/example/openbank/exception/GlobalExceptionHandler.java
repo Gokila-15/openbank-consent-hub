@@ -109,4 +109,30 @@ public ResponseEntity<Map<String, Object>> handleConsentNotFound(
                     "timestamp", LocalDateTime.now()
             ));
 }
+
+@ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+public ResponseEntity<Map<String, Object>> handleAccessDenied(
+        org.springframework.security.access.AccessDeniedException ex) {
+
+    return ResponseEntity
+            .status(HttpStatus.FORBIDDEN)
+            .body(Map.of(
+                    "status", 403,
+                    "message", "Access denied: You do not have permission to perform this operation",
+                    "timestamp", LocalDateTime.now()
+            ));
+}
+
+@ExceptionHandler(Exception.class)
+public ResponseEntity<Map<String, Object>> handleGeneralException(
+        Exception ex) {
+
+    return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(Map.of(
+                    "status", 500,
+                    "message", ex.getMessage() != null ? ex.getMessage() : "An internal server error occurred",
+                    "timestamp", LocalDateTime.now()
+            ));
+}
 }

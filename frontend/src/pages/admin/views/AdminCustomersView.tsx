@@ -67,16 +67,13 @@ export default function AdminCustomersView({
     <div className="view-container">
       {/* SECTION HEADER */}
       <div className="section-header-modern">
-        <div>
-          <h2>Customer Directory Administration</h2>
-          <p>Inspect client portfolios, maintain contact data, and onboard new bank customers</p>
-        </div>
+       
         <div className="header-actions">
           <button className="secondary-button" onClick={onRefresh}>
             🔄 Refresh
           </button>
           <button className="primary-button" onClick={onAddCustomer}>
-            + Onboard New Customer
+            + Create New Customer
           </button>
         </div>
       </div>
@@ -127,7 +124,7 @@ export default function AdminCustomersView({
                 onClick={onAddCustomer}
                 style={{ marginTop: "16px" }}
               >
-                + Onboard First Customer
+                + Create First Customer
               </button>
             ) : (
               searchTerm && (

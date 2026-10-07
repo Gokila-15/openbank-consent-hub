@@ -78,10 +78,7 @@ export default function CheckerPendingConsentsView({
     <div className="view-container">
       {/* SECTION HEADER */}
       <div className="section-header-modern">
-        <div>
-          <h2>Pending Consents Review Queue</h2>
-          <p>Review and authorize data sharing consent requests submitted by Makers</p>
-        </div>
+      
         <div className="header-actions">
           <button className="secondary-button" onClick={onRefresh}>
             🔄 Refresh

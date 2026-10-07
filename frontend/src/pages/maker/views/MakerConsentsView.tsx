@@ -148,10 +148,7 @@ export default function MakerConsentsView({
   return (
     <div className="view-container">
       <div className="section-header-modern">
-        <div>
-          <h2>Consent Hub (Maker Workflow)</h2>
-          <p>Initiate third-party data sharing requests & audit active authorizations</p>
-        </div>
+       
         <div className="header-actions">
           <button className="secondary-button" onClick={onRefresh}>
             🔄 Refresh
@@ -366,13 +363,6 @@ export default function MakerConsentsView({
                       setCreateForm({ ...createForm, expiresAt: e.target.value })
                     }
                   />
-                </div>
-
-                <div className="info-notice-box">
-                  <span className="notice-icon">ℹ️</span>
-                  <div>
-                    <strong>Four-Eyes Verification:</strong> Newly created consents start as <strong>PENDING</strong> and must be reviewed by a CHECKER or ADMIN before data access is authorized.
-                  </div>
                 </div>
               </div>
               <div className="modal-footer">

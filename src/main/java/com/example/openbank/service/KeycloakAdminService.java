@@ -1,5 +1,6 @@
 package com.example.openbank.service;
 
+import com.example.openbank.exception.BusinessException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -13,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
@@ -103,14 +106,13 @@ public class KeycloakAdminService {
         HttpEntity<MultiValueMap<String, String>> request =
                 new HttpEntity<>(body, headers);
 
-        ResponseEntity<String> response =
-                restTemplate.postForEntity(
-                        tokenUrl,
-                        request,
-                        String.class
-                );
-
         try {
+            ResponseEntity<String> response =
+                    restTemplate.postForEntity(
+                            tokenUrl,
+                            request,
+                            String.class
+                    );
 
             JsonNode json =
                     objectMapper.readTree(response.getBody());
@@ -119,9 +121,8 @@ public class KeycloakAdminService {
 
         } catch (Exception e) {
 
-            throw new RuntimeException(
-                    "Failed to obtain Keycloak admin token",
-                    e
+            throw new BusinessException(
+                    "Failed to obtain Keycloak admin token: " + e.getMessage()
             );
         }
     }
@@ -176,36 +177,50 @@ public class KeycloakAdminService {
         HttpEntity<Map<String, Object>> request =
                 new HttpEntity<>(user, headers);
 
-        ResponseEntity<Void> response =
-                restTemplate.exchange(
-                        url,
-                        HttpMethod.POST,
-                        request,
-                        Void.class
+        try {
+            ResponseEntity<Void> response =
+                    restTemplate.exchange(
+                            url,
+                            HttpMethod.POST,
+                            request,
+                            Void.class
+                    );
+
+            if (!response.getStatusCode()
+                    .equals(HttpStatus.CREATED)) {
+
+                throw new BusinessException(
+                        "Failed to create Keycloak user"
                 );
+            }
 
-        if (!response.getStatusCode()
-                .equals(HttpStatus.CREATED)) {
+            String location =
+                    response.getHeaders()
+                            .getFirst("Location");
 
-            throw new RuntimeException(
-                    "Failed to create Keycloak user"
+            if (location == null) {
+
+                throw new BusinessException(
+                        "Keycloak user created but user ID was not returned"
+                );
+            }
+
+            return location.substring(
+                    location.lastIndexOf("/") + 1
+            );
+        } catch (HttpClientErrorException.Conflict e) {
+            throw new BusinessException(
+                    "User with username '" + username + "' or email '" + email + "' already exists in Keycloak"
+            );
+        } catch (HttpStatusCodeException e) {
+            throw new BusinessException(
+                    "Keycloak user creation failed: " + e.getResponseBodyAsString()
+            );
+        } catch (Exception e) {
+            throw new BusinessException(
+                    "Error connecting to Keycloak server: " + e.getMessage()
             );
         }
-
-        String location =
-                response.getHeaders()
-                        .getFirst("Location");
-
-        if (location == null) {
-
-            throw new RuntimeException(
-                    "Keycloak user created but user ID was not returned"
-            );
-        }
-
-        return location.substring(
-                location.lastIndexOf("/") + 1
-        );
     }
 
     // =========================================================
@@ -227,65 +242,75 @@ public class KeycloakAdminService {
 
         headers.setBearerAuth(adminToken);
 
-        ResponseEntity<Map> roleResponse =
-                restTemplate.exchange(
-                        roleUrl,
-                        HttpMethod.GET,
-                        new HttpEntity<>(headers),
-                        Map.class
+        try {
+            ResponseEntity<Map> roleResponse =
+                    restTemplate.exchange(
+                            roleUrl,
+                            HttpMethod.GET,
+                            new HttpEntity<>(headers),
+                            Map.class
+                    );
+
+            Map<String, Object> role =
+                    roleResponse.getBody();
+
+            if (role == null || role.get("id") == null) {
+
+                throw new BusinessException(
+                        "CUSTOMER role not found in Keycloak"
                 );
+            }
 
-        Map<String, Object> role =
-                roleResponse.getBody();
+            // Assign CUSTOMER role to the user
+            String mappingUrl =
+                    keycloakServerUrl
+                            + "/admin/realms/"
+                            + targetRealm
+                            + "/users/"
+                            + userId
+                            + "/role-mappings/realm";
 
-        if (role == null || role.get("id") == null) {
+            Map<String, Object> roleRepresentation =
+                    new HashMap<>();
 
-            throw new RuntimeException(
-                    "CUSTOMER role not found in Keycloak"
+            roleRepresentation.put(
+                    "id",
+                    role.get("id")
             );
-        }
 
-        // Assign CUSTOMER role to the user
-        String mappingUrl =
-                keycloakServerUrl
-                        + "/admin/realms/"
-                        + targetRealm
-                        + "/users/"
-                        + userId
-                        + "/role-mappings/realm";
+            roleRepresentation.put(
+                    "name",
+                    "CUSTOMER"
+            );
 
-        Map<String, Object> roleRepresentation =
-                new HashMap<>();
+            HttpEntity<List<Map<String, Object>>> request =
+                    new HttpEntity<>(
+                            List.of(roleRepresentation),
+                            headers
+                    );
 
-        roleRepresentation.put(
-                "id",
-                role.get("id")
-        );
+            ResponseEntity<Void> response =
+                    restTemplate.exchange(
+                            mappingUrl,
+                            HttpMethod.POST,
+                            request,
+                            Void.class
+                    );
 
-        roleRepresentation.put(
-                "name",
-                "CUSTOMER"
-        );
+            if (!response.getStatusCode()
+                    .equals(HttpStatus.NO_CONTENT)) {
 
-        HttpEntity<List<Map<String, Object>>> request =
-                new HttpEntity<>(
-                        List.of(roleRepresentation),
-                        headers
+                throw new BusinessException(
+                        "Failed to assign CUSTOMER role"
                 );
-
-        ResponseEntity<Void> response =
-                restTemplate.exchange(
-                        mappingUrl,
-                        HttpMethod.POST,
-                        request,
-                        Void.class
-                );
-
-        if (!response.getStatusCode()
-                .equals(HttpStatus.NO_CONTENT)) {
-
-            throw new RuntimeException(
-                    "Failed to assign CUSTOMER role"
+            }
+        } catch (HttpStatusCodeException e) {
+            throw new BusinessException(
+                    "Keycloak role assignment failed: " + e.getResponseBodyAsString()
+            );
+        } catch (Exception e) {
+            throw new BusinessException(
+                    "Failed to assign CUSTOMER role: " + e.getMessage()
             );
         }
     }

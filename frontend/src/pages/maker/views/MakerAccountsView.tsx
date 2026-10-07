@@ -148,9 +148,10 @@ export default function MakerAccountsView({
       setActionSuccess(`Account ${closingAccount.accountNumber} has been CLOSED.`);
       setClosingAccount(null);
       onAccountsUpdated();
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error("Failed to close account:", err);
-      alert("Failed to close account. It may already be closed.");
+      setActionSuccess(null);
+      alert(err?.response?.data?.message || "Failed to close account.");
     } finally {
       setSubmitting(false);
     }
@@ -251,10 +252,7 @@ export default function MakerAccountsView({
   return (
     <div className="view-container">
       <div className="section-header-modern">
-        <div>
-          <h2>Accounts Management</h2>
-          <p>Create, manage, and service customer bank accounts</p>
-        </div>
+       
         <div className="header-actions">
           <button className="secondary-button" onClick={onRefresh}>
             🔄 Refresh
@@ -364,7 +362,7 @@ export default function MakerAccountsView({
             <table className="custom-table">
               <thead>
                 <tr>
-                  <th>Account #</th>
+                  <th>Account </th>
                   <th>Customer</th>
                   <th>Type</th>
                   <th style={{ textAlign: "right" }}>Balance</th>
@@ -648,7 +646,7 @@ export default function MakerAccountsView({
         <div className="modal-backdrop">
           <div className="modal-box">
             <div className="modal-header">
-              <h3>Account Transaction #{transactingAccount.accountNumber}</h3>
+              <h3>Account Transaction {transactingAccount.accountNumber}</h3>
               <button className="modal-close" onClick={() => setTransactingAccount(null)}>
                 ✕
               </button>
