@@ -117,8 +117,8 @@ export default function AdminConsentModal({
               </h4>
               <p className="confirm-text">
                 {confirmAction === "APPROVE"
-                  ? `Are you sure you want to approve consent request #${consent.id} for "${consent.customer?.name || "Customer"}"? This will authorize third-party data access.`
-                  : `Are you sure you want to reject consent request #${consent.id}? This will deny third-party data access.`}
+                  ? `Are you sure you want to approve consent request #${consent.id}`
+                  : `Are you sure you want to reject consent request #${consent.id}`}
               </p>
 
               <div className="confirm-actions">
@@ -156,7 +156,7 @@ export default function AdminConsentModal({
                   </div>
                   {isCreatedByCurrentUser && (
                     <div className="self-approval-warning">
-                      ⚠️ Note: You created this consent request. Self-approval is strictly forbidden under Four-Eyes policy.
+                      ⚠️ Note: You created this consent request. Self-approval is strictly forbidden.
                     </div>
                   )}
                 </div>

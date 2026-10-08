@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 public class CreateTransactionRequest {
 
@@ -12,6 +14,10 @@ public class CreateTransactionRequest {
     private Long accountId;
 
     @NotBlank(message = "Transaction type is required")
+    @Pattern(
+            regexp = "^(DEPOSIT|WITHDRAWAL|TRANSFER)$",
+            message = "Transaction type must be DEPOSIT, WITHDRAWAL or TRANSFER"
+    )
     private String type;
 
     @NotNull(message = "Amount is required")
@@ -21,6 +27,10 @@ public class CreateTransactionRequest {
     )
     private BigDecimal amount;
 
+    @Size(
+            max = 255,
+            message = "Description cannot exceed 255 characters"
+    )
     private String description;
 
     public CreateTransactionRequest() {

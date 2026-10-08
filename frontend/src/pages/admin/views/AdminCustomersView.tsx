@@ -155,7 +155,7 @@ export default function AdminCustomersView({
               <tbody>
                 {filteredCustomers.map((cust) => (
                   <tr key={cust.id}>
-                    <td className="font-mono font-semibold">#{cust.id}</td>
+                    <td className="font-mono font-semibold">{cust.id}</td>
                     <td>
                       <span className="font-bold text-main">{cust.name} {cust.lastName || ""}</span>
                     </td>
@@ -163,7 +163,7 @@ export default function AdminCustomersView({
                     <td className="font-mono">{cust.phone}</td>
                     <td>
                       {cust.username ? (
-                        <span className="font-mono text-main font-semibold">@{cust.username}</span>
+                        <span className="font-mono text-main font-semibold">{cust.username}</span>
                       ) : (
                         <span className="text-muted-small">N/A</span>
                       )}

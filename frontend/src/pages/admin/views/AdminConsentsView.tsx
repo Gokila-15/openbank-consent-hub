@@ -295,11 +295,11 @@ export default function AdminConsentsView({
 
                   return (
                     <tr key={c.id}>
-                      <td className="font-mono font-semibold">#{c.id}</td>
+                      <td className="font-mono font-semibold">{c.id}</td>
                       <td>
                         <div className="customer-cell">
                           <span className="font-semibold text-main">
-                            {c.customer?.name || `Customer #${c.customer?.id || "N/A"}`}
+                            {c.customer?.name || `Customer ${c.customer?.id || "N/A"}`}
                           </span>
                           {c.customer?.email && (
                             <span className="text-muted-small font-mono">
@@ -457,9 +457,6 @@ export default function AdminConsentsView({
 
                 <div className="info-notice-box">
                   <span className="notice-icon">ℹ️</span>
-                  <div>
-                    <strong>Verification Policy:</strong> New consents are created with <strong>PENDING</strong> status and submitted directly to the Checker review queue.
-                  </div>
                 </div>
               </div>
               <div className="modal-footer">

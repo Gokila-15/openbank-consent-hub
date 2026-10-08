@@ -44,8 +44,8 @@ public class CreateCustomerRequest {
     @NotBlank(message = "Password is required")
     @Size(
             min = 8,
-            max = 100,
-            message = "Password must contain between 8 and 100 characters"
+            max = 20,
+            message = "Password must contain between 8 and 20 characters"
     )
     private String password;
 

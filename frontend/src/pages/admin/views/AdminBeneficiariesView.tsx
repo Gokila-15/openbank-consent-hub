@@ -65,8 +65,13 @@ export default function AdminBeneficiariesView({
     e.preventDefault();
     setFormError(null);
 
-    if (!addForm.name.trim() || !addForm.accountNumber.trim() || !addForm.bankName.trim() || !addForm.ifscCode.trim()) {
+    const accNum = addForm.accountNumber.trim();
+    if (!addForm.name.trim() || !accNum || !addForm.bankName.trim() || !addForm.ifscCode.trim()) {
       setFormError("All payee fields are required.");
+      return;
+    }
+    if (!/^[0-9]{9,18}$/.test(accNum)) {
+      setFormError("Account number must contain 9 to 18 digits.");
       return;
     }
 
@@ -100,6 +105,15 @@ export default function AdminBeneficiariesView({
     e.preventDefault();
     if (!editingBen) return;
     setFormError(null);
+    const accNum = editForm.accountNumber.trim();
+    if (!editForm.name.trim() || !accNum || !editForm.bankName.trim() || !editForm.ifscCode.trim()) {
+      setFormError("All payee fields are required.");
+      return;
+    }
+    if (!/^[0-9]{9,18}$/.test(accNum)) {
+      setFormError("Account number must contain 9 to 18 digits.");
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -357,8 +371,11 @@ export default function AdminBeneficiariesView({
                     value={addForm.accountNumber}
                     onChange={(e) => setAddForm({ ...addForm, accountNumber: e.target.value })}
                     placeholder="e.g. 501002345678"
+                    pattern="[0-9]{9,18}"
+                    title="Account number must contain 9 to 18 digits"
                     required
                   />
+                  <small className="form-help">Must contain 9 to 18 digits</small>
                 </div>
                 <div className="form-group">
                   <label>Bank Name *</label>
@@ -419,13 +436,16 @@ export default function AdminBeneficiariesView({
                   />
                 </div>
                 <div className="form-group">
-                  <label>Account Number</label>
+                  <label>Account Number *</label>
                   <input
                     type="text"
                     value={editForm.accountNumber}
                     onChange={(e) => setEditForm({ ...editForm, accountNumber: e.target.value })}
+                    pattern="[0-9]{9,18}"
+                    title="Account number must contain 9 to 18 digits"
                     required
                   />
+                  <small className="form-help">Must contain 9 to 18 digits</small>
                 </div>
                 <div className="form-group">
                   <label>Bank Name</label>

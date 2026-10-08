@@ -2,14 +2,22 @@ package com.example.openbank.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-//import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Pattern;
 
 public class CreateAccountRequest {
 
     @NotBlank(message = "Account number is required")
+    @Pattern(
+            regexp = "^[0-9]{9,18}$",
+            message = "Account number must contain 9 to 18 digits"
+    )
     private String accountNumber;
 
     @NotBlank(message = "Account type is required")
+    @Pattern(
+            regexp = "^(SAVINGS|CURRENT)$",
+            message = "Account type must be SAVINGS or CURRENT"
+    )
     private String accountType;
 
     @NotNull(message = "Customer ID is required")

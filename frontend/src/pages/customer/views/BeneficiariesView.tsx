@@ -53,8 +53,8 @@ export default function BeneficiariesView({
 
   // Validate IFSC: 4 uppercase letters, 0, 6 alphanumeric
   const validateIFSC = (ifsc: string) => /^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc);
-  // Validate Account Number: digits only
-  const validateAccNum = (acc: string) => /^[0-9]+$/.test(acc);
+  // Validate Account Number: 9 to 18 digits
+  const validateAccNum = (acc: string) => /^[0-9]{9,18}$/.test(acc);
 
   const openAddModal = () => {
     setAddForm({
@@ -77,7 +77,7 @@ export default function BeneficiariesView({
       return;
     }
     if (!validateAccNum(addForm.accountNumber)) {
-      setFormError("Account number must contain only digits.");
+      setFormError("Account number must contain 9 to 18 digits.");
       return;
     }
     if (!addForm.bankName.trim()) {
@@ -130,7 +130,7 @@ export default function BeneficiariesView({
       return;
     }
     if (!validateAccNum(editForm.accountNumber)) {
-      setFormError("Account number must contain only digits.");
+      setFormError("Account number must contain 9 to 18 digits.");
       return;
     }
     if (!editForm.bankName.trim()) {
@@ -332,8 +332,11 @@ export default function BeneficiariesView({
                       setAddForm({ ...addForm, accountNumber: e.target.value })
                     }
                     placeholder="e.g. 987654321012"
+                    pattern="[0-9]{9,18}"
+                    title="Account number must contain 9 to 18 digits"
                     required
                   />
+                  <small className="form-help">Must contain 9 to 18 digits</small>
                 </div>
                 <div className="form-group">
                   <label htmlFor="ben-bank">Bank Name *</label>
@@ -427,8 +430,11 @@ export default function BeneficiariesView({
                     onChange={(e) =>
                       setEditForm({ ...editForm, accountNumber: e.target.value })
                     }
+                    pattern="[0-9]{9,18}"
+                    title="Account number must contain 9 to 18 digits"
                     required
                   />
+                  <small className="form-help">Must contain 9 to 18 digits</small>
                 </div>
                 <div className="form-group">
                   <label htmlFor="edit-ben-bank">Bank Name *</label>

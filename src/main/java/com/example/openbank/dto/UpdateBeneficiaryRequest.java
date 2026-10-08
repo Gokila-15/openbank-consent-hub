@@ -16,12 +16,16 @@ public class UpdateBeneficiaryRequest {
 
     @NotBlank(message = "Account number is required")
     @Pattern(
-            regexp = "^[0-9]+$",
-            message = "Account number must contain only digits"
+            regexp = "^[0-9]{9,18}$",
+            message = "Account number must contain 9 to 18 digits"
     )
     private String accountNumber;
 
     @NotBlank(message = "Bank name is required")
+    @Size(
+            max = 100,
+            message = "Bank name cannot exceed 100 characters"
+    )
     private String bankName;
 
     @NotBlank(message = "IFSC code is required")
@@ -33,7 +37,7 @@ public class UpdateBeneficiaryRequest {
 
     @NotBlank(message = "Status is required")
     @Pattern(
-            regexp = "ACTIVE|INACTIVE",
+            regexp = "^(ACTIVE|INACTIVE)$",
             message = "Status must be ACTIVE or INACTIVE"
     )
     private String status;

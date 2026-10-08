@@ -1,6 +1,5 @@
 package com.example.openbank.dto;
 
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
@@ -8,7 +7,7 @@ public class UpdateConsentRequest {
 
     @NotBlank(message = "Status is required")
     @Pattern(
-            regexp = "APPROVED|REJECTED",
+            regexp = "^(APPROVED|REJECTED)$",
             message = "Status must be APPROVED or REJECTED"
     )
     private String status;

@@ -88,8 +88,13 @@ export default function MakerAccountsView({
     e.preventDefault();
     setFormError(null);
 
-    if (!addForm.accountNumber.trim()) {
+    const accNum = addForm.accountNumber.trim();
+    if (!accNum) {
       setFormError("Account number is required.");
+      return;
+    }
+    if (!/^[0-9]{9,18}$/.test(accNum)) {
+      setFormError("Account number must contain 9 to 18 digits.");
       return;
     }
     if (!addForm.customerId) {
@@ -492,9 +497,11 @@ export default function MakerAccountsView({
                       setAddForm({ ...addForm, accountNumber: e.target.value })
                     }
                     placeholder="e.g. 100987654321"
+                    pattern="[0-9]{9,18}"
+                    title="Account number must contain 9 to 18 digits"
                     required
                   />
-                  <small className="form-help">Unique bank account identifier</small>
+                  <small className="form-help">Must contain 9 to 18 digits</small>
                 </div>
 
                 <div className="form-group">

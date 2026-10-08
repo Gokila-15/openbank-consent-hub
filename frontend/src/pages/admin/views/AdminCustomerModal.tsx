@@ -83,6 +83,11 @@ export default function AdminCustomerModal({
       return;
     }
 
+    if (password.length < 2 || password.length > 20) {
+      setErrorMessage("Password must be between 2 and 20 characters.");
+      return;
+    }
+
     try {
       setSubmitting(true);
       const createData: CreateCustomerRequest = {
@@ -295,8 +300,11 @@ export default function AdminCustomerModal({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
+                    minLength={2}
+                    maxLength={20}
                     required
                   />
+                  <small className="form-help">Must be between 2 and 20 characters</small>
                 </div>
               </div>
 
@@ -546,10 +554,6 @@ export default function AdminCustomerModal({
                 Are you sure you want to delete customer <strong>"{customer.name}"</strong>
         
               </p>
-              <div className="info-notice-box" style={{ textAlign: "left", marginBottom: "16px" }}>
-                <span className="notice-icon">🛡️</span>
-    
-              </div>
             </div>
           )}
         </div>

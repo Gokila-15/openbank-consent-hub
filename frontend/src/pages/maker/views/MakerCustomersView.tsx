@@ -151,8 +151,8 @@ export default function MakerCustomersView({
       setFormError("Password is required.");
       return;
     }
-    if (password.length < 8) {
-      setFormError("Password must be at least 8 characters long.");
+    if (password.length < 2 || password.length > 20) {
+      setFormError("Password must be between 2 and 20 characters.");
       return;
     }
 
@@ -469,10 +469,11 @@ export default function MakerCustomersView({
                     value={createForm.password}
                     onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
                     placeholder="e.g. Reshmi@12345"
-                    minLength={8}
+                    minLength={2}
+                    maxLength={20}
                     required
                   />
-                  <small className="form-help">Minimum 8 characters</small>
+                  <small className="form-help">Must be between 2 and 20 characters</small>
                 </div>
               </div>
               <div className="modal-footer">

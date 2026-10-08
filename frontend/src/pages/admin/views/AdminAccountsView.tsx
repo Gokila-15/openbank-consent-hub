@@ -83,8 +83,13 @@ export default function AdminAccountsView({
     e.preventDefault();
     setFormError(null);
 
-    if (!addForm.accountNumber.trim()) {
+    const accNum = addForm.accountNumber.trim();
+    if (!accNum) {
       setFormError("Account number is required.");
+      return;
+    }
+    if (!/^[0-9]{9,18}$/.test(accNum)) {
+      setFormError("Account number must contain 9 to 18 digits.");
       return;
     }
     if (!addForm.customerId) {
@@ -538,8 +543,12 @@ export default function AdminAccountsView({
                     type="text"
                     value={addForm.accountNumber}
                     onChange={(e) => setAddForm({ ...addForm, accountNumber: e.target.value })}
+                    placeholder="e.g. 10012345678"
+                    pattern="[0-9]{9,18}"
+                    title="Account number must contain 9 to 18 digits"
                     required
                   />
+                  <small className="form-help">Must contain 9 to 18 digits</small>
                 </div>
 
                 <div className="form-group">

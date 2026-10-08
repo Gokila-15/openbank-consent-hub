@@ -214,15 +214,10 @@ public class AccountService {
             throw new BusinessException(
                     "Account is already closed");
         }
-        if (account.getBalance() != null || account.getBalance().compareTo(java.math.BigDecimal.ZERO) != 0) {
+        if (account.getBalance() != null && account.getBalance().compareTo(java.math.BigDecimal.ZERO) != 0) {
 
             throw new BusinessException(
-                    "Account cannot be closed when balance is not zero");
-        }
-        if (account.getBalance().compareTo(java.math.BigDecimal.ZERO) < 0) {
-
-            throw new BusinessException(
-                    "Account cannot be closed with negative balance");
+                    "Account can be closed only when the balance is zero.");
         }
 
         account.setStatus("CLOSED");

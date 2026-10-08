@@ -59,7 +59,7 @@ export default function MakerBeneficiariesView({
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
   const validateIFSC = (ifsc: string) => /^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc);
-  const validateAccNum = (acc: string) => /^[0-9]+$/.test(acc);
+  const validateAccNum = (acc: string) => /^[0-9]{9,18}$/.test(acc);
 
   const openAddModal = () => {
     setAddForm({
@@ -82,7 +82,7 @@ export default function MakerBeneficiariesView({
       return;
     }
     if (!validateAccNum(addForm.accountNumber)) {
-      setFormError("Account number must contain only digits.");
+      setFormError("Account number must contain 9 to 18 digits.");
       return;
     }
     if (!addForm.bankName.trim()) {
@@ -134,7 +134,7 @@ export default function MakerBeneficiariesView({
       return;
     }
     if (!validateAccNum(editForm.accountNumber)) {
-      setFormError("Account number must contain only digits.");
+      setFormError("Account number must contain 9 to 18 digits.");
       return;
     }
     if (!editForm.bankName.trim()) {
@@ -454,8 +454,11 @@ export default function MakerBeneficiariesView({
                       setAddForm({ ...addForm, accountNumber: e.target.value })
                     }
                     placeholder="e.g. 987654321098"
+                    pattern="[0-9]{9,18}"
+                    title="Account number must contain 9 to 18 digits"
                     required
                   />
+                  <small className="form-help">Must contain 9 to 18 digits</small>
                 </div>
 
                 <div className="form-group">
@@ -544,8 +547,11 @@ export default function MakerBeneficiariesView({
                     onChange={(e) =>
                       setEditForm({ ...editForm, accountNumber: e.target.value })
                     }
+                    pattern="[0-9]{9,18}"
+                    title="Account number must contain 9 to 18 digits"
                     required
                   />
+                  <small className="form-help">Must contain 9 to 18 digits</small>
                 </div>
 
                 <div className="form-group">
