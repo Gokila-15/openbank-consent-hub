@@ -8,9 +8,19 @@ import jakarta.validation.constraints.Size;
 public class CreateCustomerRequest {
 
     @NotBlank(message = "Name is required")
+    @Size(
+            min = 2,
+            max = 100,
+            message = "Name must be between 2 and 100 characters"
+    )
     private String name;
 
     @NotBlank(message = "Last name is required")
+    @Size(
+            min = 2,
+            max = 100,
+            message = "Last name must be between 2 and 100 characters"
+    )
     private String lastName;
 
     @NotBlank(message = "Email is required")
@@ -34,7 +44,8 @@ public class CreateCustomerRequest {
     @NotBlank(message = "Password is required")
     @Size(
             min = 8,
-            message = "Password must contain at least 8 characters"
+            max = 100,
+            message = "Password must contain between 8 and 100 characters"
     )
     private String password;
 
