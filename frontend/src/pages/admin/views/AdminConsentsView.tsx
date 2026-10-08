@@ -1,11 +1,14 @@
 import { useState, useMemo } from "react";
-import type { Consent } from "../../../types";
+import type { Consent, Customer, CreateConsentRequest } from "../../../types";
+import { consentService } from "../../../services/consentService";
 
 interface AdminConsentsViewProps {
   consents: Consent[];
+  customers?: Customer[];
   loading: boolean;
   error: string | null;
   onRefresh: () => void;
+  onConsentsUpdated?: () => void;
   onReviewConsent: (consent: Consent) => void;
 }
 
@@ -13,13 +16,91 @@ type AdminConsentFilterStatus = "ALL" | "PENDING" | "APPROVED" | "REJECTED";
 
 export default function AdminConsentsView({
   consents,
+  customers = [],
   loading,
   error,
   onRefresh,
+  onConsentsUpdated,
   onReviewConsent,
 }: AdminConsentsViewProps) {
   const [statusFilter, setStatusFilter] = useState<AdminConsentFilterStatus>("ALL");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+
+  // Form states for Create Consent
+  const [createForm, setCreateForm] = useState<CreateConsentRequest>({
+    customerId: customers[0]?.id || 1,
+    purpose: "",
+    dataAccess: "ACCOUNT_DETAILS,TRANSACTION_HISTORY",
+    expiresAt: "",
+  });
+
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+
+  const openCreateModal = () => {
+    const defaultDate = new Date();
+    defaultDate.setDate(defaultDate.getDate() + 30);
+    const isoString = defaultDate.toISOString().slice(0, 16);
+
+    setCreateForm({
+      customerId: customers[0]?.id || (consents[0]?.customer?.id ?? 1),
+      purpose: "",
+      dataAccess: "ACCOUNT_DETAILS,TRANSACTION_HISTORY",
+      expiresAt: isoString,
+    });
+    setFormError(null);
+    setIsCreateOpen(true);
+  };
+
+  const handleCreateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+
+    if (!createForm.customerId) {
+      setFormError("Target customer is required.");
+      return;
+    }
+    if (!createForm.purpose.trim()) {
+      setFormError("Purpose is required.");
+      return;
+    }
+    if (!createForm.dataAccess.trim()) {
+      setFormError("Data access scope is required.");
+      return;
+    }
+
+    if (createForm.expiresAt) {
+      const expDate = new Date(createForm.expiresAt);
+      if (expDate <= new Date()) {
+        setFormError("Expiry date must be in the future.");
+        return;
+      }
+    }
+
+    try {
+      setSubmitting(true);
+      await consentService.createConsent({
+        ...createForm,
+        expiresAt: createForm.expiresAt
+          ? new Date(createForm.expiresAt).toISOString()
+          : undefined,
+      });
+      setActionSuccess("Consent request created successfully! Status is PENDING for Checker review.");
+      setIsCreateOpen(false);
+      onConsentsUpdated ? onConsentsUpdated() : onRefresh();
+    } catch (err: any) {
+      console.error("Failed to create consent:", err);
+      let msg = "Failed to create consent request. Please verify fields and try again.";
+      if (err?.response?.data?.message) {
+        msg = err.response.data.message;
+      }
+      setFormError(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const filteredConsents = useMemo(() => {
     return consents.filter((c) => {
@@ -108,8 +189,18 @@ export default function AdminConsentsView({
           <button className="secondary-button" onClick={onRefresh}>
             🔄 Refresh
           </button>
+          <button className="primary-button" onClick={openCreateModal}>
+            + Create Consent Request
+          </button>
         </div>
       </div>
+
+      {actionSuccess && (
+        <div className="alert-box success-alert" style={{ marginBottom: "16px" }}>
+          <span>✓ {actionSuccess}</span>
+          <button className="alert-close" onClick={() => setActionSuccess(null)}>×</button>
+        </div>
+      )}
 
       {/* FILTER & SEARCH BAR */}
       <div className="view-card filter-bar-card">
@@ -171,18 +262,13 @@ export default function AdminConsentsView({
                 ? "No third-party data sharing requests have been created yet."
                 : "Try adjusting your search criteria or status filter."}
             </p>
-            {consents.length > 0 && (searchTerm || statusFilter !== "ALL") && (
-              <button
-                className="secondary-button"
-                onClick={() => {
-                  setSearchTerm("");
-                  setStatusFilter("ALL");
-                }}
-                style={{ marginTop: "16px" }}
-              >
-                Reset All Filters
-              </button>
-            )}
+            <button
+              className="primary-button"
+              onClick={openCreateModal}
+              style={{ marginTop: "16px" }}
+            >
+              + Create First Consent
+            </button>
           </div>
         ) : (
           <div className="table-responsive">
@@ -267,6 +353,136 @@ export default function AdminConsentsView({
           </div>
         )}
       </div>
+
+      {/* CREATE CONSENT MODAL */}
+      {isCreateOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-box">
+            <div className="modal-header">
+              <h3>Create Consent Request</h3>
+              <button className="modal-close" onClick={() => setIsCreateOpen(false)}>
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handleCreateSubmit}>
+              <div className="modal-body">
+                {formError && (
+                  <div className="alert-box error-alert" style={{ marginBottom: "14px" }}>
+                    <span>⚠️ {formError}</span>
+                  </div>
+                )}
+
+                <div className="form-group">
+                  <label htmlFor="admin-create-consent-cust">Target Customer *</label>
+                  {customers && customers.length > 0 ? (
+                    <select
+                      id="admin-create-consent-cust"
+                      value={createForm.customerId}
+                      onChange={(e) =>
+                        setCreateForm({
+                          ...createForm,
+                          customerId: Number(e.target.value),
+                        })
+                      }
+                      required
+                    >
+                      {customers.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          #{c.id} - {c.name} ({c.email})
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      id="admin-create-consent-cust"
+                      type="number"
+                      value={createForm.customerId || ""}
+                      onChange={(e) =>
+                        setCreateForm({
+                          ...createForm,
+                          customerId: Number(e.target.value),
+                        })
+                      }
+                      placeholder="Enter Customer ID"
+                      required
+                    />
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="admin-consent-purpose">Purpose *</label>
+                  <input
+                    id="admin-consent-purpose"
+                    type="text"
+                    value={createForm.purpose}
+                    onChange={(e) =>
+                      setCreateForm({ ...createForm, purpose: e.target.value })
+                    }
+                    placeholder="e.g. Loan Application Verification, Wealth Advisory"
+                    required
+                  />
+                  <small className="form-help">Describe the purpose for third-party data sharing</small>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="admin-consent-data-access">Data Access Scope *</label>
+                  <select
+                    id="admin-consent-data-access"
+                    value={createForm.dataAccess}
+                    onChange={(e) =>
+                      setCreateForm({ ...createForm, dataAccess: e.target.value })
+                    }
+                  >
+                    <option value="ACCOUNT_DETAILS,TRANSACTION_HISTORY">
+                      Full Access (Account Details & Transaction History)
+                    </option>
+                    <option value="ACCOUNT_DETAILS">Account Details Only</option>
+                    <option value="TRANSACTION_HISTORY">Transaction History Only</option>
+                    <option value="BALANCE_INQUIRY">Balance Inquiry Only</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="admin-consent-expiry">Expiry Date & Time (Future)</label>
+                  <input
+                    id="admin-consent-expiry"
+                    type="datetime-local"
+                    value={createForm.expiresAt}
+                    onChange={(e) =>
+                      setCreateForm({ ...createForm, expiresAt: e.target.value })
+                    }
+                  />
+                  <small className="form-help">Leave empty for open-ended or pick future date</small>
+                </div>
+
+                <div className="info-notice-box">
+                  <span className="notice-icon">ℹ️</span>
+                  <div>
+                    <strong>Verification Policy:</strong> New consents are created with <strong>PENDING</strong> status and submitted directly to the Checker review queue.
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => setIsCreateOpen(false)}
+                  disabled={submitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="primary-button"
+                  disabled={submitting}
+                >
+                  {submitting ? "Submitting..." : "Submit Consent"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

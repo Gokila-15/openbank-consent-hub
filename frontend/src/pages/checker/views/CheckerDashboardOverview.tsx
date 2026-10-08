@@ -99,10 +99,9 @@ export default function CheckerDashboardOverview({
       {pendingCount > 0 ? (
         <div className="checker-alert-banner warning-banner">
           <div className="banner-left">
-            <span className="banner-icon">🔔</span>
+            <span className="banner-icon"></span>
             <div>
-              <strong>Action Required: {pendingCount} Pending Consent Request{pendingCount > 1 ? "s" : ""}</strong>
-              <p>Makers have submitted consent requests awaiting your Four-Eyes verification.</p>
+              <strong>Pending Consent Request{pendingCount > 1 ? "s" : ""}</strong>
             </div>
           </div>
           <button
@@ -115,7 +114,6 @@ export default function CheckerDashboardOverview({
       ) : (
         <div className="checker-alert-banner success-banner">
           <div className="banner-left">
-            
             <div>
               <strong>All Pending Consents Reviewed</strong>
               <p>There are no consent requests awaiting verification at this time.</p>

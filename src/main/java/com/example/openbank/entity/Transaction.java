@@ -30,31 +30,13 @@ public class Transaction {
     @Column(name = "transaction_date", nullable = false)
     private LocalDateTime transactionDate;
 
-    @Column(nullable = false)
-    private String status;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "expires_at", nullable = false)
-    private LocalDateTime expiresAt;
-
     public Transaction() {
     }
 
     @PrePersist
     public void prePersist() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
         if (transactionDate == null) {
-            transactionDate = createdAt;
-        }
-        if (expiresAt == null) {
-            expiresAt = createdAt.plusSeconds(5);
-        }
-        if (status == null) {
-            status = "PENDING";
+            transactionDate = LocalDateTime.now();
         }
     }
 
@@ -105,32 +87,4 @@ public class Transaction {
     public LocalDateTime getTransactionDate() {
         return transactionDate;
     }
-
-    public void setTransactionDate(LocalDateTime transactionDate) {
-        this.transactionDate = transactionDate;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getExpiresAt() {
-        return expiresAt;
-    }
-
-    public void setExpiresAt(LocalDateTime expiresAt) {
-        this.expiresAt = expiresAt;
-    }
-}
+}

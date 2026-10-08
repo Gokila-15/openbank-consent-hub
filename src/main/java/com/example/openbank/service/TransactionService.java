@@ -14,13 +14,11 @@ import com.example.openbank.repository.AccountRepository;
 import com.example.openbank.repository.CustomerRepository;
 import com.example.openbank.repository.TransactionRepository;
 
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.core.Authentication;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -94,8 +92,6 @@ public class TransactionService {
         account.setBalance(newBalance);
         accountRepository.save(account);
 
-        LocalDateTime now = LocalDateTime.now();
-
         Transaction transaction = new Transaction();
 
         transaction.setAccount(account);
@@ -107,54 +103,9 @@ public class TransactionService {
                 newBalance);
         transaction.setDescription(
                 request.getDescription());
-        transaction.setStatus("PENDING");
-        transaction.setCreatedAt(now);
-        transaction.setExpiresAt(now.plusSeconds(5));
-        transaction.setTransactionDate(now);
 
         return transactionRepository.save(transaction);
     }
-
-    @Transactional
-    public Transaction completeTransaction(Long id) {
-
-        Transaction transaction = transactionRepository
-                .findById(id)
-                .orElseThrow(() ->
-                        new TransactionNotFoundException(
-                                "Transaction not found with id: " + id));
-
-        if (!"PENDING".equalsIgnoreCase(transaction.getStatus())) {
-            throw new BusinessException(
-                    "Transaction is already " + transaction.getStatus());
-        }
-
-        LocalDateTime now = LocalDateTime.now();
-        if (transaction.getExpiresAt() != null && now.isAfter(transaction.getExpiresAt())) {
-            transaction.setStatus("ROLLED_BACK");
-            transactionRepository.save(transaction);
-            throw new BusinessException(
-                    "Transaction has expired and was rolled back");
-        }
-
-        transaction.setStatus("COMPLETED");
-        return transactionRepository.save(transaction);
-    }
-
-    @Scheduled(fixedRate = 1000)
-    @Transactional
-    public void checkAndRollbackExpiredTransactions() {
-
-        LocalDateTime now = LocalDateTime.now();
-        List<Transaction> expiredTransactions =
-                transactionRepository.findByStatusAndExpiresAtBefore("PENDING", now);
-
-        for (Transaction transaction : expiredTransactions) {
-            transaction.setStatus("ROLLED_BACK");
-            transactionRepository.save(transaction);
-        }
-    }
-
 
     public List<Transaction> getAllTransactions() {
 

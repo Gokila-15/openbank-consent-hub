@@ -2,7 +2,6 @@ package com.example.openbank.controller;
 
 import com.example.openbank.dto.CreateConsentRequest;
 import com.example.openbank.dto.UpdateConsentRequest;
-import com.example.openbank.entity.AuditTrail;
 import com.example.openbank.entity.Consent;
 import com.example.openbank.service.ConsentService;
 
@@ -44,42 +43,13 @@ public class ConsentController {
                 .body(consent);
     }
 
-    // MAKER SUBMITS CONSENT TO CHECKER
-    @PutMapping("/{id}/submit")
-    @PreAuthorize("hasAnyRole('MAKER', 'ADMIN')")
-    public ResponseEntity<Consent> submitConsent(
-            @PathVariable Long id,
-            Authentication authentication) {
-
-        return ResponseEntity.ok(
-                consentService.submitConsent(
-                        id,
-                        authentication
-                )
-        );
-    }
-
-    @PostMapping("/{id}/submit")
-    @PreAuthorize("hasAnyRole('MAKER', 'ADMIN')")
-    public ResponseEntity<Consent> submitConsentPost(
-            @PathVariable Long id,
-            Authentication authentication) {
-
-        return ResponseEntity.ok(
-                consentService.submitConsent(
-                        id,
-                        authentication
-                )
-        );
-    }
-
     // GET ALL CONSENTS
     @GetMapping
     @PreAuthorize("hasAnyRole('MAKER', 'CHECKER', 'ADMIN')")
-    public ResponseEntity<List<Consent>> getAllConsents(Authentication authentication) {
+    public ResponseEntity<List<Consent>> getAllConsents() {
 
         return ResponseEntity.ok(
-                consentService.getAllConsents(authentication)
+                consentService.getAllConsents()
         );
     }
 
@@ -129,21 +99,5 @@ public class ConsentController {
                 )
         );
     }
-
-    // GET AUDIT TRAIL FOR CONSENT
-    @GetMapping("/{id}/audit")
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'MAKER', 'CHECKER', 'ADMIN')")
-    public ResponseEntity<List<AuditTrail>> getConsentAuditTrail(
-            @PathVariable Long id,
-            Authentication authentication) {
-
-        return ResponseEntity.ok(
-                consentService.getConsentAuditTrail(
-                        id,
-                        authentication
-                )
-        );
-    }
 }
-
 

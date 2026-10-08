@@ -2,7 +2,6 @@ package com.example.openbank.service;
 
 import com.example.openbank.dto.CreateConsentRequest;
 import com.example.openbank.dto.UpdateConsentRequest;
-import com.example.openbank.entity.AuditTrail;
 import com.example.openbank.entity.Consent;
 import com.example.openbank.entity.Customer;
 import com.example.openbank.exception.BusinessException;
@@ -22,111 +21,71 @@ public class ConsentService {
 
     private final ConsentRepository consentRepository;
     private final CustomerRepository customerRepository;
-    private final AuditTrailService auditTrailService;
 
     public ConsentService(
             ConsentRepository consentRepository,
-            CustomerRepository customerRepository,
-            AuditTrailService auditTrailService) {
+            CustomerRepository customerRepository) {
 
         this.consentRepository = consentRepository;
         this.customerRepository = customerRepository;
-        this.auditTrailService = auditTrailService;
     }
 
     // CREATE CONSENT
-    public Consent createConsent(
-            CreateConsentRequest request,
-            Authentication authentication) {
+public Consent createConsent(
+        CreateConsentRequest request,
+        Authentication authentication) {
 
-        String username = authentication.getName();
+    String username = authentication.getName();
 
-        Customer customer;
+    Customer customer;
 
-        // CUSTOMER creates consent
-        if (isCustomer(authentication)) {
+    // CUSTOMER creates consent
+    if (authentication.getAuthorities()
+            .stream()
+            .anyMatch(authority ->
+                    authority.getAuthority()
+                            .equals("ROLE_CUSTOMER"))) {
 
-            customer = customerRepository
-                    .findByUsernameIgnoreCase(username)
-                    .or(() -> customerRepository.findByEmailIgnoreCase(username))
-                    .orElseThrow(() ->
-                            new CustomerNotFoundException(
-                                    "Customer not found for username: "
-                                            + username));
-        }
-
-        // MAKER / ADMIN creates consent
-        else {
-
-            customer = customerRepository
-                    .findById(request.getCustomerId())
-                    .orElseThrow(() ->
-                            new CustomerNotFoundException(
-                                    "Customer not found with id: "
-                                            + request.getCustomerId()));
-        }
-
-        Consent consent = new Consent();
-
-        // Customer whose consent is being created
-        consent.setCustomer(customer);
-
-        // Actual user who created the consent
-        consent.setCreatedBy(username);
-
-        consent.setPurpose(request.getPurpose());
-        consent.setDataAccess(request.getDataAccess());
-        consent.setExpiresAt(request.getExpiresAt());
-
-        // Every new consent starts as PENDING
-        consent.setStatus("PENDING");
-
-        Consent savedConsent = consentRepository.save(consent);
-
-        // Audit Trail 1: Customer created consent
-        auditTrailService.recordEvent(savedConsent.getId(), "CREATED", username);
-
-        // Audit Trail 2: System automatically assigned to Maker review workflow
-        auditTrailService.recordEvent(savedConsent.getId(), "SENT_TO_MAKER", "SYSTEM");
-
-        return savedConsent;
+        customer = customerRepository
+                .findByUsernameIgnoreCase(username)
+                .or(() -> customerRepository.findByEmailIgnoreCase(username))
+                .orElseThrow(() ->
+                        new CustomerNotFoundException(
+                                "Customer not found for username: "
+                                        + username));
     }
 
-    // MAKER SUBMITS CONSENT TO CHECKER
-    public Consent submitConsent(
-            Long id,
-            Authentication authentication) {
+    // MAKER / ADMIN creates consent
+    else {
 
-        Consent consent = getConsentByIdWithoutAuthentication(id);
-
-        if (!"PENDING".equalsIgnoreCase(consent.getStatus())) {
-            throw new BusinessException(
-                    "Only PENDING consent can be submitted to Checker");
-        }
-
-        String username = authentication.getName();
-
-        consent.setStatus("SUBMITTED");
-        consent.setUpdatedAt(LocalDateTime.now());
-
-        Consent savedConsent = consentRepository.save(consent);
-
-        // Audit Trail 3: Maker submitted consent to Checker
-        auditTrailService.recordEvent(savedConsent.getId(), "SUBMITTED_TO_CHECKER", username);
-
-        return savedConsent;
+        customer = customerRepository
+                .findById(request.getCustomerId())
+                .orElseThrow(() ->
+                        new CustomerNotFoundException(
+                                "Customer not found with id: "
+                                        + request.getCustomerId()));
     }
 
+    Consent consent = new Consent();
+
+    // Customer whose consent is being created
+    consent.setCustomer(customer);
+
+    // Actual user who created the consent
+    consent.setCreatedBy(username);
+
+    consent.setPurpose(request.getPurpose());
+    consent.setDataAccess(request.getDataAccess());
+    consent.setExpiresAt(request.getExpiresAt());
+
+    // Every new consent starts as PENDING
+    consent.setStatus("PENDING");
+
+    return consentRepository.save(consent);
+}
     // GET ALL CONSENTS
     public List<Consent> getAllConsents() {
-        return consentRepository.findAll();
-    }
 
-    public List<Consent> getAllConsents(Authentication authentication) {
-        if (authentication != null && isChecker(authentication) && !isAdmin(authentication)) {
-            // Checker should see only Maker-submitted consents or reviewed consents, NOT unsubmitted PENDING consents
-            return consentRepository.findByStatusIn(List.of("SUBMITTED", "APPROVED", "REJECTED"));
-        }
         return consentRepository.findAll();
     }
 
@@ -142,8 +101,17 @@ public class ConsentService {
 
         /*
          * CUSTOMER can access only their own consent.
+         *
+         * MAKER, CHECKER and ADMIN can access
+         * according to their roles.
          */
-        if (isCustomer(authentication)) {
+        boolean isCustomer = authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        authority.getAuthority()
+                                .equals("ROLE_CUSTOMER"));
+
+        if (isCustomer) {
 
             String username = authentication.getName();
 
@@ -163,16 +131,6 @@ public class ConsentService {
             }
         }
 
-        /*
-         * CHECKER cannot see unsubmitted PENDING consents.
-         */
-        if (isChecker(authentication) && !isAdmin(authentication) && !isMaker(authentication)) {
-            if ("PENDING".equalsIgnoreCase(consent.getStatus())) {
-                throw new BusinessException(
-                        "Checker can only access consents that have been submitted by Maker");
-            }
-        }
-
         return consent;
     }
 
@@ -184,7 +142,13 @@ public class ConsentService {
         /*
          * Check whether logged-in user is CUSTOMER.
          */
-        if (isCustomer(authentication)) {
+        boolean isCustomer = authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        authority.getAuthority()
+                                .equals("ROLE_CUSTOMER"));
+
+        if (isCustomer) {
 
             /*
              * Get logged-in username from Keycloak.
@@ -228,88 +192,57 @@ public class ConsentService {
     }
 
     // APPROVE / REJECT CONSENT
-    public Consent updateConsent(
-            Long id,
-            UpdateConsentRequest request,
-            Authentication authentication) {
+   public Consent updateConsent(
+        Long id,
+        UpdateConsentRequest request,
+        Authentication authentication) {
 
-        Consent consent =
-                getConsentByIdWithoutAuthentication(id);
+    Consent consent =
+            getConsentByIdWithoutAuthentication(id);
 
-        // For CHECKER, consent must be SUBMITTED
-        if (isChecker(authentication) && !isAdmin(authentication)) {
-            if (!"SUBMITTED".equalsIgnoreCase(consent.getStatus())) {
-                throw new BusinessException(
-                        "Consent must be submitted by Maker before Checker review");
-            }
-        } else {
-            // Admin fallback
-            if (!"SUBMITTED".equalsIgnoreCase(consent.getStatus()) && !"PENDING".equalsIgnoreCase(consent.getStatus())) {
-                throw new BusinessException(
-                        "Only SUBMITTED or PENDING consent can be approved or rejected");
-            }
-        }
-
-        String username = authentication.getName();
-
-        // Prevent creator from approving/rejecting own consent
-        if (consent.getCreatedBy() != null && consent.getCreatedBy().equals(username)) {
-            throw new BusinessException(
-                    "You cannot approve or reject your own consent");
-        }
-
-        // Validate status
-        if (!"APPROVED".equalsIgnoreCase(request.getStatus())
-                && !"REJECTED".equalsIgnoreCase(request.getStatus())) {
-
-            throw new BusinessException(
-                    "Consent status must be APPROVED or REJECTED");
-        }
-
-        // APPROVE
-        if ("APPROVED".equalsIgnoreCase(request.getStatus())) {
-
-            consent.setStatus("APPROVED");
-            consent.setApprovedBy(username);
-            consent.setApprovedAt(LocalDateTime.now());
-
-            Consent savedConsent = consentRepository.save(consent);
-
-            // Audit Trail 4: Checker approved consent
-            auditTrailService.recordEvent(savedConsent.getId(), "APPROVED", username);
-
-            return savedConsent;
-        }
-
-        // REJECT
-        else {
-
-            consent.setStatus("REJECTED");
-            consent.setRejectedBy(username);
-            consent.setRejectedAt(LocalDateTime.now());
-
-            Consent savedConsent = consentRepository.save(consent);
-
-            // Audit Trail 5: Checker rejected consent
-            auditTrailService.recordEvent(savedConsent.getId(), "REJECTED", username);
-
-            return savedConsent;
-        }
+    // Only PENDING consent can be processed
+    if (!"PENDING".equals(consent.getStatus())) {
+        throw new BusinessException(
+                "Only PENDING consent can be approved or rejected");
     }
 
-    // GET AUDIT TRAIL FOR CONSENT
-    public List<AuditTrail> getConsentAuditTrail(
-            Long id,
-            Authentication authentication) {
+    String username = authentication.getName();
 
-        // Validate access
-        getConsentById(id, authentication);
-
-        return auditTrailService.getAuditTrailByConsentId(id);
+    // Prevent creator from approving/rejecting own consent
+    if (consent.getCreatedBy().equals(username)) {
+        throw new BusinessException(
+                "You cannot approve or reject your own consent");
     }
 
+    // Validate status
+    if (!"APPROVED".equals(request.getStatus())
+            && !"REJECTED".equals(request.getStatus())) {
+
+        throw new BusinessException(
+                "Consent status must be APPROVED or REJECTED");
+    }
+
+    // APPROVE
+    if ("APPROVED".equals(request.getStatus())) {
+
+        consent.setStatus("APPROVED");
+        consent.setApprovedBy(username);
+        consent.setApprovedAt(LocalDateTime.now());
+
+    }
+
+    // REJECT
+    else {
+
+        consent.setStatus("REJECTED");
+        consent.setRejectedBy(username);
+        consent.setRejectedAt(LocalDateTime.now());
+    }
+
+    return consentRepository.save(consent);
+}
     // INTERNAL METHOD
-    // Used while processing consent
+    // Used by CHECKER / ADMIN while processing consent
     private Consent getConsentByIdWithoutAuthentication(
             Long id) {
 
@@ -318,40 +251,5 @@ public class ConsentService {
                         new ConsentNotFoundException(
                                 "Consent not found with id: " + id));
     }
-
-    private boolean isCustomer(Authentication authentication) {
-        if (authentication == null) return false;
-        return authentication.getAuthorities()
-                .stream()
-                .anyMatch(authority ->
-                        authority.getAuthority()
-                                .equals("ROLE_CUSTOMER"));
-    }
-
-    private boolean isChecker(Authentication authentication) {
-        if (authentication == null) return false;
-        return authentication.getAuthorities()
-                .stream()
-                .anyMatch(authority ->
-                        authority.getAuthority()
-                                .equals("ROLE_CHECKER"));
-    }
-
-    private boolean isMaker(Authentication authentication) {
-        if (authentication == null) return false;
-        return authentication.getAuthorities()
-                .stream()
-                .anyMatch(authority ->
-                        authority.getAuthority()
-                                .equals("ROLE_MAKER"));
-    }
-
-    private boolean isAdmin(Authentication authentication) {
-        if (authentication == null) return false;
-        return authentication.getAuthorities()
-                .stream()
-                .anyMatch(authority ->
-                        authority.getAuthority()
-                                .equals("ROLE_ADMIN"));
-    }
 }
+

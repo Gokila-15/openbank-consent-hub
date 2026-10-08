@@ -390,9 +390,11 @@ export default function AdminDashboard() {
         {activeTab === "consents" && (
           <AdminConsentsView
             consents={consents}
+            customers={customers}
             loading={loading}
             error={error}
             onRefresh={fetchAllData}
+            onConsentsUpdated={fetchAllData}
             onReviewConsent={handleReviewConsent}
           />
         )}

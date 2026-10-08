@@ -1,5 +1,6 @@
 package com.example.openbank.repository;
 
+
 import com.example.openbank.entity.Consent;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -9,8 +10,4 @@ public interface ConsentRepository extends JpaRepository<Consent, Long> {
 
     List<Consent> findByCustomerId(Long customerId);
 
-    List<Consent> findByStatus(String status);
-
-    List<Consent> findByStatusIn(List<String> statuses);
 }
-

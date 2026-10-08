@@ -302,9 +302,6 @@ export default function AdminCustomerModal({
 
               <div className="info-notice-box">
                 <span className="notice-icon">ℹ️</span>
-                <div>
-                  <strong>Keycloak & DB Synchronization:</strong> Automatically provisions the customer profile in PostgreSQL and grants CUSTOMER banking permissions.
-                </div>
               </div>
             </form>
           )}
@@ -536,9 +533,6 @@ export default function AdminCustomerModal({
 
               <div className="info-notice-box">
                 <span className="notice-icon">ℹ️</span>
-                <div>
-                  <strong>Admin Maintenance:</strong> Updates customer profile metadata in PostgreSQL. Keycloak identity login remains linked to username <code>{customer.username || "N/A"}</code>.
-                </div>
               </div>
             </form>
           )}
@@ -549,14 +543,12 @@ export default function AdminCustomerModal({
               <div className="confirm-icon">⚠️</div>
               <h4 className="confirm-title">Confirm Customer Deletion</h4>
               <p className="confirm-text">
-                Are you sure you want to delete customer <strong>"{customer.name}"</strong> (ID: #{customer.id})?
-                This action is permanent in the database.
+                Are you sure you want to delete customer <strong>"{customer.name}"</strong>
+        
               </p>
               <div className="info-notice-box" style={{ textAlign: "left", marginBottom: "16px" }}>
                 <span className="notice-icon">🛡️</span>
-                <div>
-                  <strong>Integrity Rule:</strong> If this customer has active accounts, transactions, or consents, database integrity will reject the deletion.
-                </div>
+    
               </div>
             </div>
           )}

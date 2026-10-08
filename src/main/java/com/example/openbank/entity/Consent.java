@@ -113,11 +113,6 @@ private LocalDateTime expiresAt;
         return updatedAt;
     }
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-
     public LocalDateTime getExpiresAt() {
         return expiresAt;
     }
