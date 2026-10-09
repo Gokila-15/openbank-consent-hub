@@ -156,7 +156,7 @@ export default function AdminConsentModal({
                   </div>
                   {isCreatedByCurrentUser && (
                     <div className="self-approval-warning">
-                      ⚠️ Note: You created this consent request. Self-approval is strictly forbidden.
+                      You created this consent request. Self-approval is strictly forbidden.
                     </div>
                   )}
                 </div>

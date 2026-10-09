@@ -421,7 +421,7 @@ export default function AdminConsentsView({
                     placeholder="e.g. Loan Application Verification, Wealth Advisory"
                     required
                   />
-                  <small className="form-help">Describe the purpose for third-party data sharing</small>
+                 
                 </div>
 
                 <div className="form-group">
@@ -452,12 +452,9 @@ export default function AdminConsentsView({
                       setCreateForm({ ...createForm, expiresAt: e.target.value })
                     }
                   />
-                  <small className="form-help">Leave empty for open-ended or pick future date</small>
+                
                 </div>
 
-                <div className="info-notice-box">
-                  <span className="notice-icon">ℹ️</span>
-                </div>
               </div>
               <div className="modal-footer">
                 <button

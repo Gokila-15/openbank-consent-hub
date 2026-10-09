@@ -308,9 +308,7 @@ export default function AdminCustomerModal({
                 </div>
               </div>
 
-              <div className="info-notice-box">
-                <span className="notice-icon">ℹ️</span>
-              </div>
+            
             </form>
           )}
 
